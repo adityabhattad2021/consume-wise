@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Coffee, Leaf, AlertTriangle, Check, X, Info } from 'lucide-react'
+import { Leaf, AlertTriangle, Check,  Info } from 'lucide-react'
 import { DetailedProduct } from '@/lib/products';
 
 
@@ -74,7 +74,7 @@ export function ProductDetails({
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
 
-                <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 flex justify-around">
+                <TabsList className="w-full flex justify-around">
                     <TabsTrigger className='flex-1' value="overview">Overview</TabsTrigger>
                     <TabsTrigger className='flex-1' value="nutrition">Nutrition</TabsTrigger>
                     <TabsTrigger className='flex-1' value="ingredients">Ingredients</TabsTrigger>
@@ -89,7 +89,7 @@ export function ProductDetails({
                         </CardHeader>
                         <CardContent>
                             <p className="text-lg mb-4">
-                                {product.name} by {product.brand} is a {product.categories.map((cat) => cat.category.name).join("/")} designed to provide a nutritious and energizing snack. With {product.nutritionalFacts?.protein || 0}g of protein per serving, it's an excellent choice for those looking to support their active lifestyle.
+                                {product.name} by {product.brand} is a {product.categories.map((cat) => cat.category.name).join("/")} designed to provide a nutritious and energizing snack. With {product.nutritionalFacts?.protein || 0}g of protein per serving, it&apos;s an excellent choice for those looking to support their active lifestyle.
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>

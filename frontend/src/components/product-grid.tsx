@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { type Product } from '@prisma/client'
 import { Card, CardContent } from "@/components/ui/card"
 
 interface ProductGridProps {
