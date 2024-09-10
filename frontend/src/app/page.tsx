@@ -6,18 +6,14 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AllProductsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+export default async function AllProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">All Products</h1>
       <div className="flex flex-col lg:flex-row gap-6">
         <main className="w-full">
           <Suspense fallback={<ProductGridSkeleton />}>
-            <ProductList searchParams={searchParams} />
+            <ProductList />
           </Suspense>
         </main>
       </div>
@@ -25,8 +21,8 @@ export default async function AllProductsPage({
   )
 }
 
-async function ProductList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const products = await getProducts(searchParams)
+async function ProductList() {
+  const products = await getProducts()
   return <ProductGrid products={products} />
 }
 

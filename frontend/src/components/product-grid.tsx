@@ -1,9 +1,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Product } from '@prisma/client'
+import { type Product } from '@prisma/client'
 import { Card, CardContent } from "@/components/ui/card"
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+interface ProductGridProps {
+  products: { 
+    id: number
+    name: string, 
+    imageUrl: string[], 
+    brand: string, 
+  }[];
+}
+
+export default function ProductGrid({ products }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => (
