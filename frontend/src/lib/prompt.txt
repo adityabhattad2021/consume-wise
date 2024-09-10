@@ -1,0 +1,62 @@
+const prompt = `Analyze these product images, focusing primarily on the nutritional information and ingredient list. Provide a detailed, critical analysis in JSON format that strictly adheres to the following structure:
+
+{
+  "name": "Full product name",
+  "brand": "Brand name",
+  "categories": ["Category1", "Category2", ...],
+  "servingSize": number,
+  "servingUnit": "Unit of measurement",
+  "nutritionalFacts": {
+    "calories": number,
+    "totalFat": number,
+    "saturatedFat": number,
+    "transFat": number,
+    "cholesterol": number,
+    "sodium": number,
+    "totalCarbohydrate": number,
+    "dietaryFiber": number,
+    "totalSugars": number,
+    "addedSugars": number,
+    "protein": number,
+    "vitaminA": number,
+    "vitaminC": number,
+    "calcium": number,
+    "iron": number
+  },
+  "ingredients": [
+    {
+      "name": "Ingredient name",
+      "description": "Brief, factual description of the ingredient",
+      "commonUses": "Common uses in food products",
+      "potentialRisks": "Potential health risks or side effects",
+      "effects": [
+        {
+          "effectType": "health benefit | side effect | long-term risk",
+          "description": "Detailed description of the effect",
+          "scientificEvidence": "Summary of scientific evidence",
+          "severity": "Severity of the effect (if applicable)",
+          "duration": "Duration of the effect (if applicable)"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim": "Product claim from packaging or marketing",
+      "verificationStatus": "Verified | Partially True | Misleading | False",
+      "explanation": "Detailed explanation comparing claim to actual content",
+      "source": "Scientific sources or regulatory guidelines used"
+    }
+  ],
+  "allergens": ["Allergen1", "Allergen2", ...]
+}
+
+Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. If certain information is not visible or cannot be inferred from the images, omit those fields from the JSON output.
+
+Additional guidelines:
+1. Ensure all numerical values are provided as numbers, not strings.
+2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
+3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
+4. Include all potential allergens visible on the product label or inferred from the ingredients.
+
+Your analysis should be comprehensive, accurate, and based on the visible information in the product images and your knowledge of food science and nutrition.`;

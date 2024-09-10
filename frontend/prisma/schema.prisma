@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Product {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  brand              String
+  categories         ProductCategory[]
+  imageUrl           String[]
+  servingSize        Float?
+  servingUnit        String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now()) @updatedAt
+  nutritionalFacts   NutritionalFact?
+  ingredients        ProductIngredient[]
+  claims             ProductClaim[]
+  allergens          ProductAllergen[]
+}
+
+model Category {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique
+  products ProductCategory[]
+}
+
+model ProductCategory {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([productId, categoryId])
+}
+
+model NutritionalFact {
+  id                Int     @id @default(autoincrement())
+  product           Product @relation(fields: [productId], references: [id])
+  productId         Int     @unique
+  calories          Float?
+  totalFat          Float?
+  saturatedFat      Float?
+  transFat          Float?
+  cholesterol       Float?
+  sodium            Float?
+  totalCarbohydrate Float?
+  dietaryFiber      Float?
+  totalSugars       Float?
+  addedSugars       Float?
+  protein           Float?
+  vitaminA          Float?
+  vitaminC          Float?
+  calcium           Float?
+  iron              Float?
+}
+
+model Ingredient {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @unique
+  products           ProductIngredient[]
+  effects            IngredientEffect[]
+  description        String?
+  commonUses         String?
+  potentialRisks     String?
+}
+
+model ProductIngredient {
+  product           Product    @relation(fields: [productId], references: [id])
+  productId         Int
+  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId      Int
+  orderNumber       Int
+
+  @@id([productId, ingredientId])
+}
+
+model IngredientEffect {
+  id                 Int        @id @default(autoincrement())
+  ingredient         Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId       Int
+  effectType         String?
+  description        String?
+  scientificEvidence String?
+  severity           String?
+  duration           String?
+}
+
+model ProductClaim {
+  id                 Int      @id @default(autoincrement())
+  product            Product  @relation(fields: [productId], references: [id])
+  productId          Int
+  claim              String
+  verificationStatus String?
+  explanation        String?
+  source             String?
+}
+
+
+model Allergen {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique
+  products ProductAllergen[]
+}
+
+model ProductAllergen {
+  product    Product @relation(fields: [productId], references: [id])
+  productId  Int
+  allergen   Allergen @relation(fields: [allergenId], references: [id])
+  allergenId Int
+
+  @@id([productId, allergenId])
+}
