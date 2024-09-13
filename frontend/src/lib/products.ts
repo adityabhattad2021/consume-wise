@@ -1,6 +1,6 @@
 "use server"
 import prisma from "@/lib/prisma"
-import { Product } from "@prisma/client";
+import { type Product } from "@prisma/client";
 
 export async function getProducts() {
     const products = await prisma.product.findMany({

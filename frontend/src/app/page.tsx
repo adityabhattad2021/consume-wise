@@ -4,14 +4,20 @@ import { getProducts } from "@/lib/products"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import Image from "next/image"
 import Link from "next/link"
+import { getCategories } from "@/lib/categories"
+import FilterBar from "@/components/filter-bar"
 
 
 export default async function AllProductsPage() {
-  const allProducts = await getProducts()
+  const allProducts = await getProducts();
+  const allCategories = await getCategories();
 
   return (
-    <main className="container mx-auto px-4 pt-32 pb-16">
-      <div className="w-[90%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    <main className="container mx-auto px-4 pt-32 pb-16 w-[90%]">
+      <FilterBar
+        categories={allCategories}
+      />
+      <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {allProducts.length > 0 ? (
           allProducts.map((product) => (
             <Card key={product.id} className="flex flex-col">

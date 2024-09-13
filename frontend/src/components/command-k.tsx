@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { CommandIcon, Loader2 } from 'lucide-react'
+import { CommandIcon } from 'lucide-react'
 import Image from 'next/image'
 
 
@@ -12,8 +12,6 @@ import Image from 'next/image'
 export function CommandK() {
     const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
@@ -67,23 +65,18 @@ export function CommandK() {
                         />
                         <Button
                             onClick={handleSearch}
-                            disabled={isLoading || query.trim() === ''}
+                            disabled={query.trim() === ''}
                             variant="ghost"
                             size="icon"
                             className="p-2"
                         >
-                            {isLoading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <Image width={20} height={20} src="/images/gemini.png" alt="gemini logo" />
-                            )}
+
+
+                            <Image width={20} height={20} src="/images/gemini.png" alt="gemini logo" />
+
                         </Button>
                     </div>
-                    {error && (
-                        <p className="mt-2 text-sm text-red-500" role="alert">
-                            {error}
-                        </p>
-                    )}
+
                 </div>
             </DialogContent>
         </Dialog>

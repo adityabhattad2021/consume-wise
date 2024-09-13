@@ -1,81 +1,77 @@
 'use client';
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+// import { useRouter, useSearchParams } from "next/navigation";
+import { Category } from "@prisma/client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+type FilterBarProps = {
+    categories: Category[];
+};
 
+export default function FilterBar({ categories }: FilterBarProps) {
+    // const router = useRouter();
+    // const searchParams = useSearchParams();
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-export default function FilterBar() {
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const [products, setProducts] = useState([])
-    const [filters, setFilters] = useState({
-        category: searchParams.get('category') || '',
-        brand: searchParams.get('brand') || '',
-        ingredient: searchParams.get('ingredient') || '',
-        claim: searchParams.get('claim') || '',
-        allergen: searchParams.get('allergen') || '',
-        minCalories: searchParams.get('minCalories') || '',
-        maxCalories: searchParams.get('maxCalories') || '',
-        minProtein: searchParams.get('minProtein') || '',
-        maxProtein: searchParams.get('maxProtein') || '',
-    })
-    const handleFilterChange = (key: any, value: any) => {
-        setFilters(prev => ({ ...prev, [key]: value }))
-        router.push(`/?${new URLSearchParams({ ...filters, [key]: value }).toString()}`)
-    }
+    const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+
+    const toggleCategory = (category: Category) => {
+        setSelectedCategories(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollRef.current) {
+            const scrollAmount = 200; 
+            const newScrollPosition = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+            scrollRef.current.scrollTo({
+                left: newScrollPosition,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     return (
-        <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Input
-                placeholder="Category"
-                value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
-            />
-            <Input
-                placeholder="Brand"
-                value={filters.brand}
-                onChange={(e) => handleFilterChange('brand', e.target.value)}
-            />
-            <Input
-                placeholder="Ingredient"
-                value={filters.ingredient}
-                onChange={(e) => handleFilterChange('ingredient', e.target.value)}
-            />
-            <Input
-                placeholder="Claim"
-                value={filters.claim}
-                onChange={(e) => handleFilterChange('claim', e.target.value)}
-            />
-            <Input
-                placeholder="Allergen (exclude)"
-                value={filters.allergen}
-                onChange={(e) => handleFilterChange('allergen', e.target.value)}
-            />
-            <Input
-                type="number"
-                placeholder="Min Calories"
-                value={filters.minCalories}
-                onChange={(e) => handleFilterChange('minCalories', e.target.value)}
-            />
-            <Input
-                type="number"
-                placeholder="Max Calories"
-                value={filters.maxCalories}
-                onChange={(e) => handleFilterChange('maxCalories', e.target.value)}
-            />
-            <Input
-                type="number"
-                placeholder="Min Protein"
-                value={filters.minProtein}
-                onChange={(e) => handleFilterChange('minProtein', e.target.value)}
-            />
-            <Input
-                type="number"
-                placeholder="Max Protein"
-                value={filters.maxProtein}
-                onChange={(e) => handleFilterChange('maxProtein', e.target.value)}
-            />
+        <div className="relative w-full pb-4">
+            <div 
+                ref={scrollRef}
+                className="flex w-full space-x-4 p-4 overflow-x-auto no-scrollbar"
+            >
+                {categories.map((category) => (
+                    <Button
+                        key={category.id}
+                        variant="outline"
+                        onClick={() => toggleCategory(category)}
+                        className={`flex-shrink-0 transition-all duration-200 ${
+                            selectedCategories.includes(category)
+                                ? 'bg-secondary'
+                                : 'hover:bg-secondary'
+                        }`}
+                    >
+                        {category.name}
+                    </Button>
+                ))}
+            </div>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-0 top-[40%] -translate-y-1/2 bg-transparent"
+                onClick={() => scroll('left')}
+            >
+                <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-[40%] -translate-y-1/2 bg-transparent"
+                onClick={() => scroll('right')}
+            >
+                <ChevronRight className="h-4 w-4" />
+            </Button>
         </div>
-    )
+    );
 }

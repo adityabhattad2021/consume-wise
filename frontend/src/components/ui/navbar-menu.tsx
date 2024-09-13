@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { ReactNode } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
 
 const transition = {
   type: "spring",
@@ -59,8 +59,13 @@ export const MenuItem = ({
   );
 };
 
+interface HoveredLinkProps extends LinkProps {
+  children: ReactNode;
+}
 
-export const HoveredLink = ({ children, ...rest }: any) => {
+
+
+export const HoveredLink = ({ children, ...rest }: HoveredLinkProps) => {
   return (
     <Link
       {...rest}
