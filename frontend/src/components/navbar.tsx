@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { CommandK } from "@/components/command-k";
 
 interface NavbarProps {
     className?: string;
@@ -32,6 +33,7 @@ export default function Navbar({ className }: NavbarProps) {
                 <div className="hidden md:flex items-center space-x-4 gap-4">
                     <NavLink href="#">Add a product</NavLink>
                     <NavLink href="#">Profile</NavLink>
+                    <CommandK/>
                 </div>
                 <div className="md:hidden flex items-center">
                     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -75,6 +77,7 @@ export default function Navbar({ className }: NavbarProps) {
                                     <MobileNavLink href="#" onClick={() => setIsOpen(false)}>
                                         Profile
                                     </MobileNavLink>
+
                                 </div>
                             </div>
                         </SheetContent>

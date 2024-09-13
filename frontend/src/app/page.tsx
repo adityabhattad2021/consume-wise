@@ -5,12 +5,11 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Image from "next/image"
 import Link from "next/link"
 
+
 export default async function AllProductsPage() {
   const allProducts = await getProducts()
 
   return (
-
-
     <main className="container mx-auto px-4 pt-32 pb-16">
       <div className="w-[90%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {allProducts.length > 0 ? (
