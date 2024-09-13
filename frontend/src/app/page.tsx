@@ -1,49 +1,63 @@
-import { Suspense } from 'react'
-import { getProducts } from '@/lib/products'
-import ProductGrid from '@/components/product-grid'
-import { Skeleton } from '@/components/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
-
-export const dynamic = 'force-dynamic'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { getProducts } from "@/lib/products"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import Image from "next/image"
+import Link from "next/link"
 
 export default async function AllProductsPage() {
+  const allProducts = await getProducts()
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">All Products</h1>
-      <div className="flex flex-col lg:flex-row gap-6">
-        <main className="w-full">
-          <Suspense fallback={<ProductGridSkeleton />}>
-            <ProductList />
-          </Suspense>
-        </main>
+
+
+    <main className="container mx-auto px-4 pt-32 pb-16">
+      <div className="w-[90%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {allProducts.length > 0 ? (
+          allProducts.map((product) => (
+            <Card key={product.id} className="flex flex-col">
+              <CardContent className="p-4 flex-grow flex flex-col">
+                <div className="w-full h-56 relative mb-4 border-2 rounded-xl overflow-hidden">
+                  {product.imageUrl.length > 0 && (
+                    <Card className="relative overflow-hidden">
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {product.imageUrl.map((url, index) => (
+                            <CarouselItem key={index}>
+                              <div className="relative aspect-square">
+                                <Image
+                                  src={url}
+                                  alt={`${product.name} - Image ${index + 1}`}
+                                  fill
+                                  className="object-cover rounded-lg"
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                      </Carousel>
+                    </Card>
+                  )}
+                </div>
+                <h2 className="text-lg font-semibold line-clamp-1">{product.name}</h2>
+                <p className="text-xs text-muted-foreground mt-1">
+                  by {product.brand}
+                </p>
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Link href={`/products/${product.id}`} className="w-full">
+                  <Button className="w-full h-10">View Product</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <p className="text-center col-span-full text-muted-foreground">No products found.</p>
+        )}
       </div>
-    </div>
+    </main>
+
   )
 }
-
-async function ProductList() {
-  const products = await getProducts()
-  return <ProductGrid products={products} />
-}
-
-interface ProductGridSkeletonProps {
-  count?: number;
-}
-
-function ProductGridSkeleton({ count = 8 }:ProductGridSkeletonProps){
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} className="h-full overflow-hidden bg-background dark:bg-background">
-          <div className="aspect-square relative overflow-hidden">
-            <Skeleton className="h-full w-full" />
-          </div>
-          <CardContent className="p-4">
-            <Skeleton className="h-6 w-3/4 mb-2" />
-            <Skeleton className="h-4 w-1/2" />
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-};

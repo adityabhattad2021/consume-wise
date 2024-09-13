@@ -11,6 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 interface ProductDetails {
 	name: string;
 	brand: string;
+	summary:string;
 	categories: string[];
 	servingSize?: number;
 	servingUnit?: string;
@@ -112,51 +113,58 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 			};
 		}));
 
-		const prompt = `Analyze these product images, focusing primarily on the nutritional information and ingredient list. Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. If certain information is not visible or cannot be inferred from the images, omit those fields from the JSON output.
+		const prompt = `Imagine you are an expert nutritionist, analyze these product images, focusing on the nutritional information and ingredient list. Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. Try to give as much information as possible to the best of your knowledge.
 
-		Additional guidelines:
-		1. Ensure all numerical values are provided as numbers, not strings.
-		2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
-		3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
-		4. Include all potential allergens visible on the product label or inferred from the ingredients.
+			Additional guidelines:
+			1. Ensure all numerical values are provided as numbers, not strings.
+			2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
+			3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
+			4. Include all potential allergens visible on the product label or inferred from the ingredients.
+			5. Generate a user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective.
 
-		Your analysis should be comprehensive, accurate, and based on the visible information in the product images and your knowledge of food science and nutrition.
+			Your analysis should be comprehensive, accurate, and based on the visible information in the product images consider the nutritional information and ingredients list as source of truth rather than the claims on the packaging and your expert knowledge of food science and nutrition.
 
-		The result should be in this JSON format:
+			The result should be in this JSON format:
 
-		1. name: Full product name
-		2. brand: Brand name
-		3. categories: Array of relevant product categories
-		4. servingSize: Number representing serving size
-		5. servingUnit: Unit of measurement for serving size
-		6. nutritionalFacts: Object containing the following nutritional information (all as numbers):
+			1. name: Full product name
+			2. brand: Brand name
+			3. categories: Array of relevant product categories
+			4. servingSize: Number representing serving size
+			5. servingUnit: Unit of measurement for serving size
+			6. nutritionalFacts: Object containing the following nutritional information (all as numbers):
 			- calories, totalFat, saturatedFat, transFat, cholesterol, sodium, totalCarbohydrate,
 			dietaryFiber, totalSugars, addedSugars, protein, vitaminA, vitaminC, calcium, iron
-		7. ingredients: Array of objects, each containing:
+			7. ingredients: Array of objects, each containing:
 			- name: Ingredient name
 			- description: Brief description of the ingredient
-			- commonUses: Common uses of the ingredient in food products
+			- commonUses: Common uses of the ingredient in food products output should be in a string.
 			- potentialRisks: Any potential health risks or side effects
-			- effects: Array of objects describing the effects of the ingredient (this is for research purpose ADD THIS), each containing:
-			- effectType: Type of effect (e.g., "health benefit", "side effect")
-			- description: Description of the effect
-			- scientificEvidence: Brief summary of scientific evidence supporting the effect
-			- severity: Severity of the effect 
-			- duration: Duration of the effect
-		8. claims: Array of objects, each containing:
+			- effects: Array of objects describing the effects of the ingredient, each containing:
+				- effectType: Type of effect (e.g., "health benefit", "side effect")
+				- description: Description of the effect
+				- scientificEvidence: Brief summary of scientific evidence supporting the effect
+				- severity: Severity of the effect 
+				- duration: Duration of the effect
+			8. claims: Array of objects, each containing:
 			- claim: The product claim
-			- verificationStatus: Status of claim verification, generate the status by considering the ingredients and nutritional details (e.g., "Verified", "Unverified","Misleading")
-			- explanation: Explanation or context for the generated verification status for the claim
+			- verificationStatus: Status of claim verification (e.g., "Verified", "Unverified", "Misleading")
+			- explanation: Explanation or context for the verification status
 			- source: Source of the claim or its verification
-		9. allergens: Array of potential allergens present in the product
-	
-		Provide as much detailed information as possible based on the product images and your knowledge. If certain information is not visible or cannot be inferred, you may omit those fields.`;
+			9. allergens: Array of potential allergens present in the product
+			10. summary: A user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective. This summary should:
+			- Not look like it is promoting the product, give it from a third person nutritionalist view who has best interest of the user.
+			- Highlight key nutritional aspects
+			- Discuss potential health benefits and risks
+			- Offer recommendations for consumption
+			- Use language that is accessible to the general public while maintaining scientific accuracy
+
+			Provide as much detailed information as possible based on the product images and your expert knowledge.`;
 
 		const result = await model.generateContent([prompt, ...imageParts]);
 		const response = result.response;
 		const text = response.text();
 		console.log(text);
-		
+
 		return JSON.parse(text) as ProductDetails;
 	} catch (err) {
 		console.log("error while analyzing data with gemini", err);
@@ -188,6 +196,7 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 		data: {
 			name: productDetails.name,
 			brand: productDetails.brand,
+			summary:productDetails.summary,
 			imageUrl: imageUrls,
 			servingSize: productDetails.servingSize,
 			servingUnit: productDetails.servingUnit,
@@ -288,5 +297,5 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40297523/the-whole-truth-pro-20g-protein-bar-coffee-cocoa-no-added-sugar-67-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=1&t_s=Pro+20g+Protein+Bar+-+Coffee+Cocoa%252C+No+Added+Sugar';
+const productUrl = 'https://www.bigbasket.com/pd/40122053/ritebite-max-protein-daily-choco-almond-bar-50-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=3&t_s=Daily+Choco+Almond+Bar';
 main(productUrl);
