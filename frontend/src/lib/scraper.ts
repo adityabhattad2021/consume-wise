@@ -310,5 +310,5 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40122053/ritebite-max-protein-daily-choco-almond-bar-50-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=3&t_s=Daily+Choco+Almond+Bar';
+const productUrl = 'https://www.bigbasket.com/pd/40237234/maggi-2-minute-instant-noodles-veggie-masala-made-with-quality-spices-rich-in-fibre-248-g-pouch/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=3&t_s=2-Minute+Instant+Noodles+-+Veggie+Masala';
 main(productUrl);

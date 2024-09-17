@@ -8,8 +8,16 @@ import { getCategories } from "@/lib/categories"
 import FilterBar from "@/components/filter-bar"
 
 
-export default async function AllProductsPage() {
-  const allProducts = await getProducts();
+export default async function AllProductsPage({
+  searchParams,
+}:{
+  searchParams?:{
+    categories?:string;
+  }
+}) {
+
+  const categories = searchParams?.categories?.split(',') || [];
+  const allProducts = await getProducts(categories);
   const allCategories = await getCategories();
 
   return (

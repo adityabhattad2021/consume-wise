@@ -27,7 +27,7 @@ export default function Navbar({ className }: NavbarProps) {
                         whileHover={{ scale: 1.05 }}
                         className="text-xl md:text-2xl font-bold"
                     >
-                        FoodFacts101
+                        ConsumeWise
                     </motion.h1>
                 </Link>
                 <div className="hidden md:flex items-center space-x-4 gap-4">
