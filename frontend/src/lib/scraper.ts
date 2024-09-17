@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 interface ProductDetails {
 	name: string;
 	brand: string;
-	summary:string;
+	summary: string;
 	categories: string[];
 	servingSize?: number;
 	servingUnit?: string;
@@ -113,52 +113,60 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 			};
 		}));
 
-		const prompt = `Imagine you are an expert nutritionist, analyze these product images, focusing on the nutritional information and ingredient list. Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. Try to give as much information as possible to the best of your knowledge.
+		const availableCategories = await prisma.category.findMany({})
+		const categoryArryString = `[${availableCategories.join(', ')}]`
 
-			Additional guidelines:
-			1. Ensure all numerical values are provided as numbers, not strings.
-			2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
-			3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
-			4. Include all potential allergens visible on the product label or inferred from the ingredients.
-			5. Generate a user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective.
+		const prompt = `As an expert nutritionist, analyze these product images, focusing on the nutritional information and ingredient list. Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. Give as much information as possible to the best of your knowledge.
 
-			Your analysis should be comprehensive, accurate, and based on the visible information in the product images consider the nutritional information and ingredients list as source of truth rather than the claims on the packaging and your expert knowledge of food science and nutrition.
+		Additional guidelines:
+		1. Ensure all numerical values are provided as numbers, not strings.
+		2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
+		3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
+		4. Include all potential allergens visible on the product label or inferred from the ingredients.
+		5. Generate a user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective.
+		6. Do not leave any field blank. If information is not available, use "N/A" or provide a reasonable estimate based on your expert knowledge.
 
-			The result should be in this JSON format:
+		Your analysis should be comprehensive, accurate, and based on the visible information in the product images. Consider the nutritional information and ingredients list as the source of truth rather than the claims on the packaging and your expert knowledge of food science and nutrition.
 
-			1. name: Full product name
-			2. brand: Brand name
-			3. categories: Array of relevant product categories
-			4. servingSize: Number representing serving size
-			5. servingUnit: Unit of measurement for serving size
-			6. nutritionalFacts: Object containing the following nutritional information (all as numbers):
-			- calories, totalFat, saturatedFat, transFat, cholesterol, sodium, totalCarbohydrate,
+		The result should be in this JSON format:
+
+		1. name: Full product name
+		2. brand: Brand name
+		3. categories: Array of relevant product categories (choose from: ${categoryArryString})
+		4. servingSize: Number representing serving size (use -1 if not available)
+		5. servingUnit: Unit of measurement for serving size (use "N/A" if not available)
+		6. nutritionalFacts: Object containing the following nutritional information (all as numbers, use -1 if not available):
+		- calories, totalFat, saturatedFat, transFat, cholesterol, sodium, totalCarbohydrate,
 			dietaryFiber, totalSugars, addedSugars, protein, vitaminA, vitaminC, calcium, iron
-			7. ingredients: Array of objects, each containing:
-			- name: Ingredient name
-			- description: Brief description of the ingredient
-			- commonUses: Common uses of the ingredient in food products output should be in a string.
-			- potentialRisks: Any potential health risks or side effects
-			- effects: Array of objects describing the effects of the ingredient, each containing:
-				- effectType: Type of effect (e.g., "health benefit", "side effect")
-				- description: Description of the effect
-				- scientificEvidence: Brief summary of scientific evidence supporting the effect
-				- severity: Severity of the effect 
-				- duration: Duration of the effect
-			8. claims: Array of objects, each containing:
-			- claim: The product claim
-			- verificationStatus: Status of claim verification (e.g., "Verified", "Unverified", "Misleading")
-			- explanation: Explanation or context for the verification status
-			- source: Source of the claim or its verification
-			9. allergens: Array of potential allergens present in the product
-			10. summary: A user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective. This summary should:
-			- Not look like it is promoting the product, give it from a third person nutritionalist view who has best interest of the user.
+		7. ingredients: Array of objects, each containing:
+		- name: Ingredient name
+		- description: Brief description of the ingredient
+		- commonUses: Common uses of the ingredient in food products (as a string)
+		- potentialRisks: Any potential health risks or side effects
+		- effects: Array of objects describing the effects of the ingredient, each containing:
+			- effectType: Type of effect (e.g., "health benefit", "side effect")
+			- description: Description of the effect
+			- scientificEvidence: Brief summary of scientific evidence supporting the effect
+			- severity: Severity of the effect 
+			- duration: Duration of the effect
+		8. claims: Array of objects, each containing:
+		- claim: The product claim
+		- verificationStatus: Status of claim verification (e.g., "Verified", "Unverified", "Misleading")
+		- explanation: Explanation or context for the verification status
+		- source: Source of the claim or its verification
+		9. allergens: Array of potential allergens present in the product
+		10. summary: A user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective. This summary should:
+			- Be written from a third-person point of view
+			- Not promote the product
 			- Highlight key nutritional aspects
 			- Discuss potential health benefits and risks
 			- Offer recommendations for consumption
 			- Use language that is accessible to the general public while maintaining scientific accuracy
+			- Provide a conclusive statement on whether the product is good for consumers
+			- Evaluate whether the product's claims are true or misleading
+			- Recommend whether users should consider alternatives
 
-			Provide as much detailed information as possible based on the product images and your expert knowledge.`;
+		Provide as much detailed information as possible based on the product images and your expert knowledge. Ensure that no field is left blank and that the summary is conclusive and unbiased.`;
 
 		const result = await model.generateContent([prompt, ...imageParts]);
 		const response = result.response;
@@ -192,11 +200,21 @@ async function storeImagesInVercelBlob(imageUrls: string[]): Promise<string[]> {
 }
 
 async function storeProductInDatabase(productDetails: ProductDetails, imageUrls: string[]) {
+
+	const categoryPromises = productDetails.categories.map(async (categoryName) => {
+		return prisma.category.upsert({
+			where: { name: categoryName },
+			update: {},
+			create: { name: categoryName },
+		});
+	});
+	const categories = await Promise.all(categoryPromises);
+
 	const product = await prisma.product.create({
 		data: {
 			name: productDetails.name,
 			brand: productDetails.brand,
-			summary:productDetails.summary,
+			summary: productDetails.summary,
 			imageUrl: imageUrls,
 			servingSize: productDetails.servingSize,
 			servingUnit: productDetails.servingUnit,
@@ -247,15 +265,10 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 				}))
 			},
 			categories: {
-				create: productDetails.categories.map(name => ({
-					category: {
-						connectOrCreate: {
-							where: { name },
-							create: { name }
-						}
-					}
-				}))
-			}
+				create: categories.map((category) => ({
+					category: { connect: { id: category.id } },
+				})),
+			},
 		},
 		include: {
 			nutritionalFacts: true,
