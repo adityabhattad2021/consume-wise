@@ -6,13 +6,11 @@ import { Header } from "./header";
 import { Social } from "./social";
 
 
-
-
 export function LoginForm() {
     return (
         <Card className="w-[400px] shadow-md">
             <CardHeader>
-                <Header label={"comsume wisely everday!"} />
+                <Header label={"Continue with Google"} />
             </CardHeader>
             <CardContent>
                 <div className="flex items-center p-6 pt-0">

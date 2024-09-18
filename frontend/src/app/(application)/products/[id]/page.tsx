@@ -40,6 +40,9 @@ const calculateHealthScore = (product: DetailedProduct) => {
   return Math.min(Math.max(score, 0), 100) // Ensure score is between 0 and 100
 }
 
+
+// TODO: We can optimize this page by breaking down the component and streaming individual components.
+
 export default async function ProductDetailsPage({
   params
 }:{

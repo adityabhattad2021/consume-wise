@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "@/app/globals.css";
+import Navbar from "@/components/navbar";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -9,19 +10,23 @@ const font = Poppins({
 
 export const metadata: Metadata = {
   title: "ConsumeWise",
-  description: "ConsumeWise Application",
+  description: "TODO",
 };
 
-export default function RootLayout({
+export default function ApplicationLayout({
   children,
+  modal
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={font.className}>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background">
         {children}
-      </body>
-    </html>
+      </div>
+      {modal}
+    </>
   );
 }

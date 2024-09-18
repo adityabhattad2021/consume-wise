@@ -26,7 +26,7 @@ export function Header({
                     font.className
                 )}
             >
-                ConsumeWise
+                Login
             </h1>
             <p className="text-muted-foreground">
                 {label}

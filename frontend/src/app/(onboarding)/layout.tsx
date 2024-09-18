@@ -8,20 +8,18 @@ const font = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "ConsumeWise",
-  description: "ConsumeWise Application",
+  title: "ConsumeWise - Onboarding",
+  description: "Onboarding process for ConsumeWise",
 };
 
-export default function RootLayout({
+export default function OnboardingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={font.className}>
-        {children}
-      </body>
-    </html>
+    <div className="min-h-screen bg-background">
+      {children}
+    </div>
   );
 }
