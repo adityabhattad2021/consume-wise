@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 
-
-const inter = Inter({ subsets: ["latin"] });
+const font = Poppins({
+  subsets:["latin"],
+  weight:["600"]
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,16 +15,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+  modal
+}: {
   children: React.ReactNode;
-}>) {
+  modal:React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className={`${inter.className} flex flex-col min-h-screen bg-background text-foreground`}>
+      <body className={`${font.className} flex flex-col min-h-screen bg-background text-foreground`}>
+        <Navbar />
         <div className="min-h-screen bg-background">
-          <Navbar />
           {children}
         </div>
+        {modal}
       </body>
     </html>
   );

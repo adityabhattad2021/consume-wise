@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DetailedProduct } from '@/lib/products'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Suspense } from 'react'
 
 const nutritionKeys = [
   "calories", "totalFat", "saturatedFat", "transFat", "cholesterol", "sodium",
@@ -41,17 +42,17 @@ const calculateHealthScore = (product: DetailedProduct) => {
 
 export default async function ProductDetailsPage({
   params
-}: {
-  params: {
-    id: string
+}:{
+  params:{
+    id:string
   }
 }) {
+
   const product = await getProduct(Number(params.id));
   if (!product) {
     redirect("/")
   }
-
-  const healthScore = calculateHealthScore(product)
+  const healthScore =  calculateHealthScore(product)
 
   return (
     <div className="container mx-auto px-10 md:px-24 py-8 pt-32">
@@ -60,24 +61,28 @@ export default async function ProductDetailsPage({
           <div className="sticky top-28">
             {product.imageUrl.length > 0 && (
               <Card className="relative overflow-hidden">
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {product.imageUrl.map((url, index) => (
-                      <CarouselItem key={index}>
-                        <div className="relative aspect-square">
-                          <Image
-                            src={url}
-                            alt={`${product.name} - Image ${index + 1}`}
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
-                </Carousel>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {product.imageUrl.map((url, index) => (
+                        <CarouselItem key={index}>
+                          <div className="relative aspect-square">
+                            <Image
+                              src={url}
+                              alt={`${product.name} - Image ${index + 1}`}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              className="object-cover rounded-lg"
+                              priority={index === 0}
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                  </Carousel>
+                </Suspense>
               </Card>
             )}
             <div className="space-y-4 mt-4">
@@ -180,6 +185,7 @@ export default async function ProductDetailsPage({
                   <CardTitle>Ingredients</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <Suspense fallback={<div>Loading...</div>}>
                   <Accordion type="single" collapsible className="w-full">
                     {product.ingredients.map((ingredient, index) => (
                       <AccordionItem value={`item-${index}`} key={index}>
@@ -208,6 +214,7 @@ export default async function ProductDetailsPage({
                       </AccordionItem>
                     ))}
                   </Accordion>
+                  </Suspense>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -239,5 +246,5 @@ export default async function ProductDetailsPage({
       </div>
     </div>
   )
-
 }
+
