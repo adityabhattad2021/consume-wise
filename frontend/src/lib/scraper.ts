@@ -310,5 +310,5 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40237234/maggi-2-minute-instant-noodles-veggie-masala-made-with-quality-spices-rich-in-fibre-248-g-pouch/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=3&t_s=2-Minute+Instant+Noodles+-+Veggie+Masala';
+const productUrl = 'https://www.bigbasket.com/pd/30012173/yoga-bar-multigrain-energy-bar-nuts-n-seed-38-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=5&t_s=Multigrain+Energy+Bar+-+Nuts+%2526+Seeds%252C+Healthy+Snack%252C+High+In+Protein+%2526+Fibre';
 main(productUrl);
