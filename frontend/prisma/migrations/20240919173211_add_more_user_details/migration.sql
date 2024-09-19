@@ -1,0 +1,26 @@
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHERS');
+
+-- CreateEnum
+CREATE TYPE "HealthDetail" AS ENUM ('NORMAL', 'UNDERWEIGHT', 'OVERWEIGHT', 'OBESE', 'DIABETES', 'HYPERTENSION', 'CARDIOVASCULAR', 'RESPIRATORY', 'DIGESTIVE', 'ALLERGIES', 'THYROID', 'ARTHRITIS');
+
+-- CreateEnum
+CREATE TYPE "ActivityLevel" AS ENUM ('SEDENTARY', 'LIGHTLY_ACTIVE', 'MODERATELY_ACTIVE', 'VERY_ACTIVE', 'EXTREMELY_ACTIVE');
+
+-- CreateEnum
+CREATE TYPE "DietaryPreference" AS ENUM ('EGGITARIAN', 'VEGETARIAN', 'VEGAN');
+
+-- CreateEnum
+CREATE TYPE "HealthGoal" AS ENUM ('HEALTH_BOOST', 'WEIGHT_LOSS', 'WEIGHT_GAIN', 'MUSCLE_GAIN', 'LESS_SUGAR', 'CARDIO_CARE', 'BETTER_SLEEP', 'STRESS_REDUCTION', 'IMPROVED_DIGESTION', 'INCREASED_ENERGY');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "activityLevel" "ActivityLevel",
+ADD COLUMN     "age" INTEGER,
+ADD COLUMN     "dietaryPreference" "DietaryPreference",
+ADD COLUMN     "gender" "Gender",
+ADD COLUMN     "healthDetails" "HealthDetail"[],
+ADD COLUMN     "healthGoal" "HealthGoal",
+ADD COLUMN     "height" DOUBLE PRECISION,
+ADD COLUMN     "isOnboarded" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "nutritionKnowledge" INTEGER,
+ADD COLUMN     "weight" DOUBLE PRECISION;

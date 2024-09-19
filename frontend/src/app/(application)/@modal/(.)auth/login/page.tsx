@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function InterceptedLoginPage() {
     const router = useRouter();
 
-    function handleOpenChange(){
+    function handleOpenChange() {
         router.back()
     }
 

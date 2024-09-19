@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Leaf } from "lucide-react"
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
+import { auth } from "@/auth";
 
 
 const CommandK = dynamic(() => import('@/components/command-k'), {
@@ -15,7 +16,11 @@ interface NavbarProps {
     className?: string;
 }
 
-export default function Navbar({ className }: NavbarProps) {
+export default async function Navbar({ className }: NavbarProps) {
+
+    const session  = await auth();
+    const profileHref = session?.user ? '/profile' : 'auth/login';
+
     return (
         <nav className={cn("fixed top-6 inset-x-0 mx-auto w-[88%] z-50", className)}>
             <div className="relative rounded-2xl border bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-lg flex items-center justify-between px-4 md:px-8 py-4 md:py-6">
@@ -25,10 +30,12 @@ export default function Navbar({ className }: NavbarProps) {
                 </Link>
                 <div className="hidden md:flex items-center space-x-4 gap-4">
                     <NavLink href="#">Add a product</NavLink>
-                    <NavLink href="/auth/login">Profile</NavLink>
+                    <NavLink href={profileHref}>Profile</NavLink>
                     <CommandK />
                 </div>
-                <MobileMenu />
+                <MobileMenu 
+                    profileHref={profileHref}
+                />
             </div>
         </nav>
     );
@@ -45,7 +52,11 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     );
 }
 
-function MobileMenu() {
+function MobileMenu({
+    profileHref
+}:{
+    profileHref:string
+}) {
     return (
         <div className="md:hidden">
             <Sheet>
@@ -63,7 +74,7 @@ function MobileMenu() {
                         <h3 className="text-xl font-semibold border-b border-secondary-foreground/20 pb-2">ConsumeWise</h3>
                         <div className="text-xl font-semibold pt-2">
                             <MobileNavLink href="#">Add a product</MobileNavLink>
-                            <MobileNavLink href="#">Profile</MobileNavLink>
+                            <MobileNavLink href={profileHref}>Profile</MobileNavLink>
                         </div>
                     </div>
                 </SheetContent>

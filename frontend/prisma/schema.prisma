@@ -133,11 +133,69 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+
+  isOnboarded       Boolean            @default(false)
+  gender            Gender?
+  age               Int?
+  weight            Float?
+  height            Float?
+  healthDetails     HealthDetail[]
+  activityLevel     ActivityLevel?
+  dietaryPreference DietaryPreference?
+  nutritionKnowledge Int?
+  healthGoal        HealthGoal?
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHERS
+}
+
+enum HealthDetail {
+  NORMAL
+  UNDERWEIGHT
+  OVERWEIGHT
+  OBESE
+  DIABETES
+  HYPERTENSION
+  CARDIOVASCULAR
+  RESPIRATORY
+  DIGESTIVE
+  ALLERGIES
+  THYROID
+  ARTHRITIS
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTREMELY_ACTIVE
+}
+
+enum DietaryPreference {
+  EGGITARIAN
+  VEGETARIAN
+  VEGAN
+}
+
+enum HealthGoal {
+  HEALTH_BOOST
+  WEIGHT_LOSS
+  WEIGHT_GAIN
+  MUSCLE_GAIN
+  LESS_SUGAR
+  CARDIO_CARE
+  BETTER_SLEEP
+  STRESS_REDUCTION
+  IMPROVED_DIGESTION
+  INCREASED_ENERGY
+}
 
 model Account {
   userId            String
