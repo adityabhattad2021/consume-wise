@@ -34,7 +34,6 @@ export function LoginForm({
                 </div>
                 <div className="flex items-center p-6 pt-0">
                     <BackButton
-                        href={"/"}
                         label={"Go back ->"}
                     />
                 </div>

@@ -33,7 +33,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async session({ session, user }) {
-      // @ts-ignore
+      // @ts-expect-error not sure how it works
       session.user.isOnboarded = user.isOnboarded;
       return session;
     },

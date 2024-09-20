@@ -114,3 +114,119 @@ export async function getProduct(id: number): Promise<DetailedProduct | null> {
 
   return detailedProduct
 }
+
+
+export async function getProductBasicInfo(id: number) {
+  return await prisma.product.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      brand: true,
+      imageUrl: true,
+      summary: true,
+      servingSize: true,
+      servingUnit: true,
+    },
+  });
+}
+
+export async function getProductOverview(id: number) {
+  return prisma.product.findUnique({
+    where: { id },
+    select: {
+      summary: true,
+      nutritionalFacts: {
+        select: {
+          protein: true,
+          totalFat: true,
+          totalCarbohydrate: true,
+          saturatedFat:true,
+          addedSugars:true,
+          dietaryFiber: true,
+        },
+      },
+      ingredients: {
+        select: {
+          ingredient: {
+            select: { name: true },
+          },
+        },
+        take: 5,
+      },
+    },
+  })
+}
+
+export async function getProductCategories(id: number) {
+  return await prisma.productCategory.findMany({
+    where: { productId: id },
+    include: { category: true },
+  });
+}
+
+export async function getProductNutrition(id: number) {
+  return prisma.product.findUnique({
+    where: { id },
+    select: {
+      servingSize: true,
+      servingUnit: true,
+      nutritionalFacts: true,
+    },
+  })
+}
+
+export async function getProductIngredients(productId: number) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        ingredients: {
+          include: {
+            ingredient: {
+              include: {
+                effects: true,
+              },
+            },
+          },
+          orderBy: {
+            orderNumber: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return null;
+    }
+
+    // Restructure the data to match the component's expected format
+    const formattedProduct = {
+      ...product,
+      ingredients: product.ingredients.map((productIngredient) => ({
+        ...productIngredient.ingredient,
+        effects: productIngredient.ingredient.effects,
+      })),
+    };
+
+    return formattedProduct;
+  } catch (error) {
+    console.error('Error fetching product ingredients:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getProductClaims(id: number) {
+  return await prisma.productClaim.findMany({
+    where: { productId: id },
+  });
+}
+
+export async function getProductAllergens(id: number) {
+  return await prisma.productAllergen.findMany({
+    where: { productId: id },
+    include: { allergen: true },
+  });
+}

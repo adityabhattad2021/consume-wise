@@ -8,7 +8,7 @@ import Link from "next/link";
 import { getCategories } from "@/lib/categories";
 import FilterBar from "@/components/filter-bar";
 import Loader from '@/components/loader';
-import { auth } from '@/auth';
+
 
 export default async function AllProductsPage({
   searchParams,
@@ -17,8 +17,6 @@ export default async function AllProductsPage({
     categories?: string;
   }
 }) {
-
-  const session = await auth();
   
   const categories = searchParams?.categories?.split(',') || [];
   const allCategoriesPromise = getCategories();

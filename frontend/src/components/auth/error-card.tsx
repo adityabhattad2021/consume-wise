@@ -13,7 +13,6 @@ export function ErrorCard(){
             <CardFooter>
                 <BackButton
                     label="Back to login"
-                    href="/auth/login"
                 />
             </CardFooter>
         </Card>
