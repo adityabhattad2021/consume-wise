@@ -16,7 +16,7 @@ export default function ProductBasicInfo({
     product
 }: ProductBasicInfoProps) {
     return (
-        <div className="lg:w-1/3">
+        <div className="lg:w-2/5">
             <div className="sticky top-28">
                 {product.imageUrl.length > 0 && (
                     <Card className="relative overflow-hidden">

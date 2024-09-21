@@ -31,11 +31,11 @@ export default async function ProductDetailsPage({
 
   return (
     <div className="container mx-auto px-10 md:px-24 py-8 pt-32">
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-20">
         <Suspense fallback={<ProductBasicInfoSkeleton />}>
           <ProductBasicInfo product={basicInfo} />
         </Suspense>
-        <div className="lg:w-2/3">
+        <div className="lg:w-3/5">
           <h1 className="text-4xl font-bold mb-2">{basicInfo.name}</h1>
           <div className="flex justify-between items-center mb-6">
             <p className="text-lg text-gray-600">By: {basicInfo.brand}</p>
