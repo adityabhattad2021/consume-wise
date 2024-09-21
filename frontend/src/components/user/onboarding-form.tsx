@@ -1,16 +1,31 @@
 "use client"
 import React, { useState, memo } from 'react'
 import { ChevronRight, ChevronLeft, Check, Carrot, Leaf, Scale, Heart, Sparkles, LucideIcon } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import confetti from 'canvas-confetti'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { object, z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form"
+import { userFormSchema, Gender, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from '@/form_schema/user'
+import { triggerConfetti } from "@/lib/confetti";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { capitalizeWords } from '@/lib/capitalize_word'
 
 interface Field {
   name: string
   key: string
   type: 'text' | 'number' | 'select' | 'multiselect'
-  options?: string[]
+  options?: any[]
 }
 
 interface Step {
@@ -26,7 +41,7 @@ const steps: Step[] = [
     name: 'Your Profile',
     description: 'Help us personalize your experience.',
     fields: [
-      { name: 'Gender', key: 'gender', type: 'select', options: ['Male', 'Female', 'Other'] },
+      { name: 'Gender', key: 'gender', type: 'select', options: Object.values(Gender.enum) },
       { name: 'Age', key: 'age', type: 'number' },
       { name: 'Weight (kg)', key: 'weight', type: 'number' },
       { name: 'Height (cm)', key: 'height', type: 'number' }
@@ -38,7 +53,7 @@ const steps: Step[] = [
     name: 'Health Considerations',
     description: 'Let us know about any specific health conditions.',
     fields: [
-      { name: 'Health Details', key: 'healthDetails', type: 'multiselect', options: ['No specific conditions', 'Diabetes', 'High blood pressure', 'Heart disease', 'Food allergies', 'Gluten intolerance'] }
+      { name: 'Health Details', key: 'healthDetails', type: 'multiselect', options: Object.values(HealthDetail.enum) }
     ],
     icon: <Heart className="w-8 h-8 text-red-500" />,
     feature: "Smart alerts for ingredients you should avoid!"
@@ -47,8 +62,8 @@ const steps: Step[] = [
     name: 'Lifestyle Choices',
     description: 'Tell us about your activity and dietary preferences.',
     fields: [
-      { name: 'Regular Activity Level', key: 'activityLevel', type: 'select', options: ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'] },
-      { name: 'Dietary Preference', key: 'dietaryPreference', type: 'select', options: ['No Preference', 'Vegetarian', 'Vegan', 'Pescatarian', 'Keto', 'Paleo'] }
+      { name: 'Regular Activity Level', key: 'activityLevel', type: 'select', options: Object.values(ActivityLevel.enum) },
+      { name: 'Dietary Preference', key: 'dietaryPreference', type: 'select', options: Object.values(DietaryPreference.enum) }
     ],
     icon: <Carrot className="w-8 h-8 text-orange-500" />,
     feature: "Discover new foods that match your lifestyle!"
@@ -57,8 +72,8 @@ const steps: Step[] = [
     name: 'Your Health Goals',
     description: 'What do you want to achieve with ConsumeWise?',
     fields: [
-      { name: 'Nutrition Knowledge', key: 'nutritionKnowledge', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced'] },
-      { name: 'Health Goal', key: 'healthGoal', type: 'select', options: ['Make healthier choices', 'Manage weight', 'Reduce sugar intake', 'Heart health', 'Understand food labels better'] }
+      { name: 'Nutrition Knowledge', key: 'nutritionKnowledge', type: 'select', options: [1, 2, 3] },
+      { name: 'Health Goal', key: 'healthGoal', type: 'select', options: Object.values(HealthGoal.enum) }
     ],
     icon: <Leaf className="w-8 h-8 text-green-500" />,
     feature: "Track your progress and celebrate your health victories!"
@@ -94,311 +109,378 @@ const Header = memo(function Header({ step, totalSteps }: HeaderProps) {
   )
 })
 
-interface FormData {
-  username: string
-  basicInfo: {
-    gender: string
-    age: string
-    weight: string
-    height: string
-  }
-  healthDetails: string[]
-  lifestyle: {
-    activityLevel: string
-    dietaryPreference: string
-  }
-  goals: {
-    nutritionKnowledge: string
-    healthGoal: string
-  }
-}
+
 
 export default function OnboardingForm() {
   const [step, setStep] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
-  const [formData, setFormData] = useState<FormData>({
-    username: '',
-    basicInfo: { gender: '', age: '', weight: '', height: '' },
-    healthDetails: [],
-    lifestyle: { activityLevel: '', dietaryPreference: '' },
-    goals: { nutritionKnowledge: '', healthGoal: '' },
+  const form = useForm<z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      gender: undefined,
+      age: undefined,
+      weight: undefined,
+      height: undefined,
+      healthDetails: [],
+      activityLevel: undefined,
+      dietaryPreference: undefined,
+      nutritionKnowledge: undefined,
+      healthGoals: [],
+    },
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, section?: keyof FormData) => {
-    const { name, value, type } = e.target
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement
-      const updatedHealthDetails = target.checked
-        ? [...formData.healthDetails, value]
-        : formData.healthDetails.filter(item => item !== value)
-      setFormData(prev => ({ ...prev, healthDetails: updatedHealthDetails }))
-    } else if (section) {
-      setFormData(prev => ({
-        ...prev,
-        [section]: { ...prev[section] as Record<string, string>, [name]: value }
-      }))
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }))
-    }
-  }
 
-  const handleNext = () => {
-    if (step < steps.length - 1) {
+  const handleNext = async () => {
+    const currentStep = steps[step]
+    const isValid = await form.trigger(currentStep.fields.map(val=>val.key) as any)
+    if (isValid && step < steps.length - 1) {
       setStep(prev => prev + 1)
     }
   }
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     if (step > 0) {
       setStep(prev => prev - 1)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
+  async function onSubmit(values: z.infer<typeof userFormSchema>) {
+    console.log(values);
     setIsComplete(true)
     triggerConfetti()
   }
 
-  const triggerConfetti = () => {
-    var duration = 5 * 1000;
-    var animationEnd = Date.now() + duration;
-    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-    function randomInRange(min:number, max:number) {
-      return Math.random() * (max - min) + min;
-    }
-
-    var interval = setInterval(function () {
-      var timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval);
-      }
-
-      var particleCount = 50 * (timeLeft / duration);
-      // since particles fall down, start a bit higher than random
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-    }, 250);
-  }
 
   return (
     <div className="w-full max-w-md min-w-0 sm:min-w-[800px] mx-auto mt-4 p-4 bg-white rounded-2xl md:shadow-xl border-solid morder-0 md:border-2">
       <h2 className="text-xl font-bold mb-4 text-center text-green-600">Welcome to ConsumeWise</h2>
       <Header step={step} totalSteps={steps.length} />
       {!isComplete ? (
-        <form onSubmit={handleSubmit}>
-          <div
-            className="mb-6 min-h-[300px] w-full"
-          >
-            <div className="flex items-center mb-4">
-              {steps[step].icon}
-              <h3 className="text-xl font-semibold ml-3">{steps[step].name}</h3>
-            </div>
-            <p className="text-gray-600 mb-6">{steps[step].description}</p>
-            {
-              step === 0 && (
-                <>
-                  {/* Gender */}
-                  <div className='flex flex-col sm:flex-row gap-3 mb-3'>
-                    <div className='flex-1'>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
-                      <select
-                        name="gender"
-                        value={formData.basicInfo.gender}
-                        onChange={(e) => handleInputChange(e, 'basicInfo')}
-                        className="w-full p-3 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select Gender</option>
-                        {steps[0].fields[0].options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* Age */}
-                    <div className='flex-1'>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Age</label>
-                      <Input
-                        type="number"
-                        name="age"
-                        value={formData.basicInfo.age}
-                        onChange={(e) => handleInputChange(e, 'basicInfo')}
-                        className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-
-
-                  {/* Weight */}
-                  <div className='flex flex-col sm:flex-row gap-3 mb-3'>
-                    <div className='flex-1'>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Weight (Kg)</label>
-                      <Input
-                        type="number"
-                        name="weight"
-                        value={formData.basicInfo.weight}
-                        onChange={(e) => handleInputChange(e, 'basicInfo')}
-                        className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    {/* Height */}
-                    <div className='flex-1'>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Height (cm)</label>
-                      <Input
-                        type="number"
-                        name="height"
-                        value={formData.basicInfo.height}
-                        onChange={(e) => handleInputChange(e, 'basicInfo')}
-                        className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-                </>
-              )
-            }
-            {
-              step === 1 && (
-                <div className="mb-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Health Details</label>
-                  <div className="space-y-2">
-                    {steps[1].fields[0].options?.map((option) => (
-                      <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="healthDetails"
-                          value={option}
-                          checked={formData.healthDetails.includes(option)}
-                          onChange={(e) => handleInputChange(e)}
-                          className="form-checkbox h-5 w-5 text-green-600 rounded transition duration-150 ease-in-out"
-                        />
-                        <span>{option}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )
-            }
-
-            {
-              step === 2 && (
-                <>
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Regular Activity Level</label>
-                    <select
-                      name="activityLevel"
-                      value={formData.lifestyle.activityLevel}
-                      onChange={(e) => handleInputChange(e, 'lifestyle')}
-                      className="w-full p-3 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select Activity Level</option>
-                      {steps[2].fields[0].options?.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Dietary Preference</label>
-                    <select
-                      name="dietaryPreference"
-                      value={formData.lifestyle.dietaryPreference}
-                      onChange={(e) => handleInputChange(e, 'lifestyle')}
-                      className="w-full p-3 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select Dietary Preference</option>
-                      {steps[2].fields[1].options?.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )
-            }
-
-            {step === 3 && (
-              <>
-                <div className="mb-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Nutrition Knowledge</label>
-                  <select
-                    name="nutritionKnowledge"
-                    value={formData.goals.nutritionKnowledge}
-                    onChange={(e) => handleInputChange(e, 'goals')}
-                    className="w-full p-3 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Nutrition Knowledge Level</option>
-                    {steps[3].fields[0].options?.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Health Goal</label>
-                  <select
-                    name="healthGoal"
-                    value={formData.goals.healthGoal}
-                    onChange={(e) => handleInputChange(e, 'goals')}
-                    className="w-full p-3 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Health Goal</option>
-                    {steps[3].fields[1].options?.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
-          </div>
-
-
-          <div className="flex justify-between mt-8">
-            <Button
-              type="button"
-              onClick={handlePrevious}
-              disabled={step === 0}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 transition-all duration-300"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div
+              className="mb-6 min-h-[300px] w-full"
             >
-              <ChevronLeft className="inline-block mr-1" size={18} />
-              Back
-            </Button>
-            {step === steps.length - 1 ? (
-              <Button
-                type="submit"
-                className="px-6 py-2 bg-green-500 text-white rounded-lg transition-all duration-300"
-              >
-                Start Your Journey
-                <Check className="inline-block ml-1" size={18} />
-              </Button>
-            ) : (
+              <div className="flex items-center mb-4">
+                {steps[step].icon}
+                <h3 className="text-xl font-semibold ml-3">{steps[step].name}</h3>
+              </div>
+              <p className="text-gray-600 mb-6">{steps[step].description}</p>
+              {
+                step === 0 && (
+                  <>
+                    {/* Gender */}
+                    <div className='flex flex-col sm:flex-row gap-3 mb-3'>
+                      <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => {
+                          return (
+                            <FormItem className='flex-1'>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                              <Select
+                                name="gender"
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <SelectValue placeholder="Select Gender" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {steps[0].fields[0].options?.map((option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {capitalizeWords(option)}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )
+                        }}
+                      />
+
+                      {/* Age */}
+                      <FormField
+                        control={form.control}
+                        name="age"
+                        render={({ field }) => {
+                          return (
+                            <FormItem className='flex-1'>
+                              <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Age</FormLabel>
+                              <FormControl>
+                                <Input
+
+                                  placeholder='Enter your age here'
+                                  className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )
+                        }}
+                      />
+                    </div>
+
+
+                    {/* Weight */}
+                    <div className='flex flex-col sm:flex-row gap-3 mb-3'>
+                      <FormField
+                        control={form.control}
+                        name='weight'
+                        render={({ field }) => {
+                          return (
+                            <FormItem className='flex-1'>
+                              <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Weight (Kg)</FormLabel>
+                              <FormControl>
+                                <Input
+
+                                  placeholder='Enter your weight'
+                                  {...field}
+                                  value={field.value || ''}
+                                  className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )
+                        }}
+                      />
+                      <FormField
+                        control={form.control}
+                        name='height'
+                        render={({ field }) => {
+                          return (
+                            <FormItem className='flex-1'>
+                              <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Height (cm)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder='Enter your height here'
+                                  className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )
+                        }}
+                      />
+                    </div>
+                  </>
+                )
+              }
+              {
+                step === 1 && (
+                  <FormField
+                    control={form.control}
+                    name='healthDetails'
+                    render={({ field }) => {
+
+                      return (
+                        <FormItem className='mb-3'>
+                          <FormLabel className="block text-xs font-medium text-gray-700 mb-4">
+                            Health Details
+                          </FormLabel>
+                          <div className='grid grid-cols-2 md:grid-cols-3 text-sm gap-2 md:gap-4'>
+                            {steps[1].fields[0].options?.map((item) => {
+                              return (
+                                <div className='flex mb-2 justify-start items-center gap-2' key={item}>
+                                  <FormControl>
+                                    <Checkbox
+                                      // @ts-ignore
+                                      id={item}
+                                      checked={field.value?.includes(item)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value, item])
+                                          : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item
+                                            )
+                                          )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <label htmlFor={item} className="font-normal">
+                                    {capitalizeWords(item)}
+                                  </label>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )
+                    }}
+                  />
+                )
+              }
+
+              {
+                step === 2 && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="activityLevel"
+                      render={({ field }) => (
+                        <FormItem className='mb-3'>
+                          <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Regular Activity Level</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <SelectValue placeholder="Select Activity Level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {steps[2].fields[0].options?.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {capitalizeWords(option)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="dietaryPreference"
+                      render={({ field }) => (
+                        <FormItem className='mb-3'>
+                          <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Dietary Preference</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <SelectValue placeholder="Select Dietary Preference" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {steps[2].fields[1].options?.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {capitalizeWords(option)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )
+              }
+
+              {step === 3 && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="nutritionKnowledge"
+                    render={({ field }) => {
+                     
+                      return (
+                        <FormItem className='mb-3'>
+                          <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Nutrition Knowledge</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value ? field.value.toString() : ''}>
+                            <FormControl>
+                              <SelectTrigger className="w-full p-3 py-6 border border-gray-300 rounded-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <SelectValue placeholder="Select Nutrition Knowledge Level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {steps[3].fields[0].options?.map((option) => (
+                                <SelectItem key={option} value={option.toString() || ''}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )
+                    }}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="healthGoals"
+                    render={({ field }) => (
+                      <FormItem className='mb-3'>
+                        <FormLabel className="block text-xs font-medium text-gray-700 mb-1">Health Goal</FormLabel>
+                        <FormControl>
+                          <div className='grid grid-cols-2 md:grid-cols-3 text-sm gap-2 md:gap-4'>
+                            {steps[3].fields[1].options?.map((item) => {
+                              return (
+                                <div className='flex mb-2 justify-start items-center gap-2' key={item}>
+                                  <Checkbox
+                                    // @ts-ignore
+                                    checked={field.value?.includes(item)}
+                                    id={item}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, item])
+                                        : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== item
+                                          )
+                                        )
+                                    }}
+                                  />
+                                  <label htmlFor={item} className="font-normal text-wrap">
+                                    {capitalizeWords(item)}
+                                  </label>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </div>
+
+
+            <div className="flex justify-between mt-8">
               <Button
                 type="button"
-                onClick={handleNext}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg transition-all duration-300"
+                onClick={handlePrevious}
+                disabled={step === 0}
+                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 transition-all duration-300"
               >
-                Continue
-                <ChevronRight className="inline-block ml-1" size={18} />
+                <ChevronLeft className="inline-block mr-1" size={18} />
+                Back
               </Button>
-            )}
-          </div>
-        </form>
+              {step === steps.length - 1 && (
+                <Button
+                  type="submit"
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg transition-all duration-300"
+                >
+                  Start Your Journey
+                  <Check className="inline-block ml-1" size={18} />
+                </Button>
+              )
+              }
+
+              {step < steps.length - 1 && (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg transition-all duration-300"
+                >
+                  Continue
+                  <ChevronRight className="inline-block ml-1" size={18} />
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
