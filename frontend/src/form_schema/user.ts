@@ -46,11 +46,6 @@ export const HealthGoal = z.enum([
     "INCREASED_ENERGY"
 ]);
 
-export const NutritionKnowledge = z.enum([
-    "BEGINNER",
-    "INTERMEDIATE",
-    "ADVANCED"
-])
 
 export const userFormSchema = z.object({
     gender: Gender,
