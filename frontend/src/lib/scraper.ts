@@ -310,5 +310,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/30012173/yoga-bar-multigrain-energy-bar-nuts-n-seed-38-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=5&t_s=Multigrain+Energy+Bar+-+Nuts+%2526+Seeds%252C+Healthy+Snack%252C+High+In+Protein+%2526+Fibre';
+const productUrl = 'https://www.bigbasket.com/pd/1201303/britannia-biscuits-marie-gold-2x250-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=1&t_s=Biscuits+-+Marie+Gold';
 main(productUrl);
+
+

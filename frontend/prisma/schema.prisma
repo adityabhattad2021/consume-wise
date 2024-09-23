@@ -12,20 +12,28 @@ datasource db {
 }
 
 model Product {
-  id                 Int                  @id @default(autoincrement())
-  name               String
-  brand              String
-  categories         ProductCategory[]
-  imageUrl           String[]
-  servingSize        Float?
-  servingUnit        String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @default(now()) @updatedAt
-  nutritionalFacts   NutritionalFact?
-  ingredients        ProductIngredient[]
-  claims             ProductClaim[]
-  allergens          ProductAllergen[]
-  summary            String
+  id               Int                 @id @default(autoincrement())
+  name             String
+  brand            String
+  categories       ProductCategory[]
+  imageUrl         String[]
+  servingSize      Float?
+  servingUnit      String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @default(now()) @updatedAt
+  nutritionalFacts NutritionalFact?
+  ingredients      ProductIngredient[]
+  claims           ProductClaim[]
+  allergens        ProductAllergen[]
+  summary          String
+
+  // Fields for health-based recommendations
+  healthScore        Float
+  nutritionDensity   Float
+  functionalBenefits String[]
+  suitableFor        HealthDetail[]
+  notSuitableFor     HealthDetail[]
+  recommendations    UserRecommendation[]
 }
 
 model Category {
@@ -65,21 +73,21 @@ model NutritionalFact {
 }
 
 model Ingredient {
-  id                 Int                  @id @default(autoincrement())
-  name               String               @unique
-  products           ProductIngredient[]
-  effects            IngredientEffect[]
-  description        String?
-  commonUses         String?
-  potentialRisks     String?
+  id             Int                 @id @default(autoincrement())
+  name           String              @unique
+  products       ProductIngredient[]
+  effects        IngredientEffect[]
+  description    String?
+  commonUses     String?
+  potentialRisks String?
 }
 
 model ProductIngredient {
-  product           Product    @relation(fields: [productId], references: [id])
-  productId         Int
-  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId      Int
-  orderNumber       Int
+  product      Product    @relation(fields: [productId], references: [id])
+  productId    Int
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+  orderNumber  Int
 
   @@id([productId, ingredientId])
 }
@@ -96,15 +104,14 @@ model IngredientEffect {
 }
 
 model ProductClaim {
-  id                 Int      @id @default(autoincrement())
-  product            Product  @relation(fields: [productId], references: [id])
+  id                 Int     @id @default(autoincrement())
+  product            Product @relation(fields: [productId], references: [id])
   productId          Int
   claim              String
   verificationStatus String?
   explanation        String?
   source             String?
 }
-
 
 model Allergen {
   id       Int               @id @default(autoincrement())
@@ -113,7 +120,7 @@ model Allergen {
 }
 
 model ProductAllergen {
-  product    Product @relation(fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
   productId  Int
   allergen   Allergen @relation(fields: [allergenId], references: [id])
   allergenId Int
@@ -121,32 +128,68 @@ model ProductAllergen {
   @@id([productId, allergenId])
 }
 
-
-
 // User tables
 
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
 
-  isOnboarded       Boolean            @default(false)
-  gender            Gender?
-  age               Int?
-  weight            Float?
-  height            Float?
-  healthDetails     HealthDetail[]
-  activityLevel     ActivityLevel?
-  dietaryPreference DietaryPreference?
+  isOnboarded        Boolean            @default(false)
+  gender             Gender?
+  age                Int?
+  weight             Float?
+  height             Float?
+  activityLevel      ActivityLevel?
+  dietaryPreference  DietaryPreference?
   nutritionKnowledge Int?
-  healthGoal        HealthGoal[]
- 
+  healthGoal         HealthGoal[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Fields for health based recommendation
+  bmr                Float
+  healthDetails      HealthDetail[]
+  dailyCalorieNeeds  Float
+  macroNutrientRatio MacroNutrientRatio?
+  microNutrientNeeds MicroNutrientNeed[]
+  // Ignoring allergies for now.
+
+  recommenations UserRecommendation[]
+}
+
+model MacroNutrientRatio {
+  id      Int    @id @default(autoincrement())
+  userId  String @unique
+  protein Float
+  carbs   Float
+  fats    Float
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model MicroNutrientNeed {
+  id       Int    @id @default(autoincrement())
+  userId   String
+  nutrient String
+  amount   Float
+  unit     String
+  user     User   @relation(fields: [userId], references: [id])
+}
+
+model UserRecommendation {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  productId    Int
+  matchScore   Float
+  reasonString String[]
+  date         DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  product      Product  @relation(fields: [productId], references: [id])
 }
 
 enum Gender {
@@ -209,12 +252,12 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
 
@@ -223,8 +266,7 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
