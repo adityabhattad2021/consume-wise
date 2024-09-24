@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const Gender = z.enum(["MALE", "FEMALE", "OTHERS"]);
+export const BiologicalSex = z.enum(["MALE", "FEMALE"]);
 
 export const HealthDetail = z.enum([
     "NORMAL",
@@ -48,7 +48,7 @@ export const HealthGoal = z.enum([
 
 
 export const userFormSchema = z.object({
-    gender: Gender,
+    biologicalSex: BiologicalSex,
     age: z.string(),
     weight: z.string(),
     height: z.string(),

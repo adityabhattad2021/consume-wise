@@ -1,5 +1,5 @@
 import { Carrot, Heart, Leaf, Scale } from "lucide-react"
-import { Gender, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from '@/form_schema/user'
+import { BiologicalSex, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from '@/form_schema/user'
 
 interface Field {
     name: string
@@ -22,7 +22,7 @@ interface Field {
       name: 'Your Profile',
       description: 'Help us personalize your experience.',
       fields: [
-        { name: 'Gender', key: 'gender', type: 'select', options: Object.values(Gender.enum) },
+        { name: 'Gender', key: 'gender', type: 'select', options: Object.values(BiologicalSex.enum) },
         { name: 'Age', key: 'age', type: 'number' },
         { name: 'Weight (kg)', key: 'weight', type: 'number' },
         { name: 'Height (cm)', key: 'height', type: 'number' }

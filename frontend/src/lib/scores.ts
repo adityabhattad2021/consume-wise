@@ -1,5 +1,7 @@
 // Implement a system to score a product.
 
+import { ActivityLevel, BiologicalSex, HealthGoal } from "@prisma/client";
+
 type NutritionalFactWithoutId = {
   calories?: number;
   totalFat?: number;
@@ -86,6 +88,57 @@ export function calculateProductHealthScore(nutritionalFacts: NutritionalFactWit
 
   const transformedScore = Math.pow(weightedScore / 100, 0.7) * 100;
 
-  return  Math.round(transformedScore * 10) / 10;
+  return Math.round(transformedScore * 10) / 10;
 }
 
+/**
+ * It uses Harris-Benedict formula (which takes into account weight, height, age and sex).
+ */
+export function calculateDailyCalorieNeeds(
+  biologicalSex: BiologicalSex,
+  weight: number,  // in kg
+  height: number,  // in cm
+  age: number,
+  activityLevel: ActivityLevel,
+  goals: HealthGoal[]
+): number {
+  let bmr: number;
+  if (biologicalSex === BiologicalSex.MALE) {
+    bmr = 66 + (9.6 * weight) + (4.799 * height) - (5.677 * age);
+  } else {
+    bmr = 655 + (13.7 * weight) + (5 * height) - (6.8 * age);
+  }
+
+  let activityMultiplier;
+  switch (activityLevel) {
+    case ActivityLevel.SEDENTARY:
+      activityMultiplier = 1.2;
+      break;
+    case ActivityLevel.LIGHTLY_ACTIVE:
+      activityMultiplier = 1.375;
+      break;
+    case ActivityLevel.MODERATELY_ACTIVE:
+      activityMultiplier = 1.55;
+      break;
+    case ActivityLevel.VERY_ACTIVE:
+      activityMultiplier = 1.725;
+      break;
+    case ActivityLevel.EXTREMELY_ACTIVE:
+      activityMultiplier = 1.9;
+      break;
+    default:
+      activityMultiplier = 0;
+      break;
+  }
+
+  const tdee = bmr * activityMultiplier;
+
+  let extraCal = 0;
+  if (goals.includes(HealthGoal.WEIGHT_GAIN)) {
+    extraCal = 300
+  } else if (goals.includes(HealthGoal.WEIGHT_LOSS)) {
+    extraCal = -400;
+  }
+
+  return Math.round(tdee + extraCal);
+}

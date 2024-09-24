@@ -140,46 +140,47 @@ model User {
   sessions      Session[]
 
   isOnboarded        Boolean            @default(false)
-  gender             Gender?
+  biologicalSex      BiologicalSex?
   age                Int?
   weight             Float?
   height             Float?
   activityLevel      ActivityLevel?
   dietaryPreference  DietaryPreference?
   nutritionKnowledge Int?
-  healthGoal         HealthGoal[]
+  healthGoals         HealthGoal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Fields for health based recommendation
-  bmr                Float
   healthDetails      HealthDetail[]
   dailyCalorieNeeds  Float
-  macroNutrientRatio MacroNutrientRatio?
-  microNutrientNeeds MicroNutrientNeed[]
+
+  // Can be added later on.
+  // macroNutrientRatio MacroNutrientRatio?
+  // microNutrientNeeds MicroNutrientNeed[]
   // Ignoring allergies for now.
 
   recommenations UserRecommendation[]
 }
 
-model MacroNutrientRatio {
-  id      Int    @id @default(autoincrement())
-  userId  String @unique
-  protein Float
-  carbs   Float
-  fats    Float
-  user    User   @relation(fields: [userId], references: [id])
-}
+// model MacroNutrientRatio {
+//   id      Int    @id @default(autoincrement())
+//   userId  String @unique
+//   protein Float
+//   carbs   Float
+//   fats    Float
+//   user    User   @relation(fields: [userId], references: [id])
+// }
 
-model MicroNutrientNeed {
-  id       Int    @id @default(autoincrement())
-  userId   String
-  nutrient String
-  amount   Float
-  unit     String
-  user     User   @relation(fields: [userId], references: [id])
-}
+// model MicroNutrientNeed {
+//   id       Int    @id @default(autoincrement())
+//   userId   String
+//   nutrient String
+//   amount   Float
+//   unit     String
+//   user     User   @relation(fields: [userId], references: [id])
+// }
 
 model UserRecommendation {
   id           Int      @id @default(autoincrement())
@@ -192,10 +193,9 @@ model UserRecommendation {
   product      Product  @relation(fields: [productId], references: [id])
 }
 
-enum Gender {
+enum BiologicalSex {
   MALE
   FEMALE
-  OTHERS
 }
 
 enum HealthDetail {

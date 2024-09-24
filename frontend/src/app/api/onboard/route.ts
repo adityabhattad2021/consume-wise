@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { userFormSchema } from "@/form_schema/user";
 import { type Session } from "next-auth";
+import { calculateDailyCalorieNeeds } from "@/lib/scores";
 
 interface NextAuthRequest extends NextRequest {
     auth: Session | null;
@@ -33,8 +34,9 @@ export const POST = auth(async function POST(req: NextAuthRequest) {
 
         const data = validationResult.data;
 
+        
         const transformedData = {
-            gender: data.gender,
+            biologicalSex: data.biologicalSex,
             age: parseInt(data.age),
             weight: parseFloat(data.weight),
             height: parseFloat(data.height),
@@ -42,15 +44,20 @@ export const POST = auth(async function POST(req: NextAuthRequest) {
             activityLevel: data.activityLevel,
             dietaryPreference: data.dietaryPreference,
             nutritionKnowledge: parseInt(data.nutritionKnowledge),
-            healthGoal: data.healthGoals,
+            healthGoals: data.healthGoals,
             isOnboarded: true
         };
+
+        const dailyCalNeeds = calculateDailyCalorieNeeds(transformedData.biologicalSex,transformedData.weight,transformedData.height,transformedData.age,data.activityLevel,transformedData.healthGoals);
 
         await prisma.user.update({
             where: {
                 id: req.auth.user.id
             },
-            data: transformedData
+            data: {
+                ...transformedData,
+                dailyCalorieNeeds:dailyCalNeeds
+            }
         });
 
         return NextResponse.json({ message: 'Success', status: 200 })

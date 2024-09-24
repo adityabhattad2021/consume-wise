@@ -1,12 +1,16 @@
 /*
   Warnings:
 
+  - You are about to drop the column `gender` on the `User` table. All the data in the column will be lost.
+  - You are about to drop the column `healthGoal` on the `User` table. All the data in the column will be lost.
   - Added the required column `healthScore` to the `Product` table without a default value. This is not possible if the table is not empty.
   - Added the required column `nutritionDensity` to the `Product` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `bmr` to the `User` table without a default value. This is not possible if the table is not empty.
   - Added the required column `dailyCalorieNeeds` to the `User` table without a default value. This is not possible if the table is not empty.
 
 */
+-- CreateEnum
+CREATE TYPE "BiologicalSex" AS ENUM ('MALE', 'FEMALE');
+
 -- AlterTable
 ALTER TABLE "Product" ADD COLUMN     "functionalBenefits" TEXT[],
 ADD COLUMN     "healthScore" DOUBLE PRECISION NOT NULL,
@@ -15,30 +19,14 @@ ADD COLUMN     "nutritionDensity" DOUBLE PRECISION NOT NULL,
 ADD COLUMN     "suitableFor" "HealthDetail"[];
 
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "bmr" DOUBLE PRECISION NOT NULL,
-ADD COLUMN     "dailyCalorieNeeds" DOUBLE PRECISION NOT NULL;
+ALTER TABLE "User" DROP COLUMN "gender",
+DROP COLUMN "healthGoal",
+ADD COLUMN     "biologicalSex" "BiologicalSex",
+ADD COLUMN     "dailyCalorieNeeds" DOUBLE PRECISION NOT NULL,
+ADD COLUMN     "healthGoals" "HealthGoal"[];
 
--- CreateTable
-CREATE TABLE "MacroNutrientRatio" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "protein" DOUBLE PRECISION NOT NULL,
-    "carbs" DOUBLE PRECISION NOT NULL,
-    "fats" DOUBLE PRECISION NOT NULL,
-
-    CONSTRAINT "MacroNutrientRatio_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "MicroNutrientNeed" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "nutrient" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
-    "unit" TEXT NOT NULL,
-
-    CONSTRAINT "MicroNutrientNeed_pkey" PRIMARY KEY ("id")
-);
+-- DropEnum
+DROP TYPE "Gender";
 
 -- CreateTable
 CREATE TABLE "UserRecommendation" (
@@ -51,15 +39,6 @@ CREATE TABLE "UserRecommendation" (
 
     CONSTRAINT "UserRecommendation_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "MacroNutrientRatio_userId_key" ON "MacroNutrientRatio"("userId");
-
--- AddForeignKey
-ALTER TABLE "MacroNutrientRatio" ADD CONSTRAINT "MacroNutrientRatio_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "MicroNutrientNeed" ADD CONSTRAINT "MicroNutrientNeed_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserRecommendation" ADD CONSTRAINT "UserRecommendation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

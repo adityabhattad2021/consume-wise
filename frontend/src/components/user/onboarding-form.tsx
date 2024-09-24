@@ -59,7 +59,7 @@ export default function OnboardingForm() {
   const form = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      gender: undefined,
+      biologicalSex: undefined,
       age: undefined,
       weight: undefined,
       height: undefined,
@@ -119,13 +119,13 @@ export default function OnboardingForm() {
                     <div className='flex flex-col sm:flex-row gap-3 mb-3'>
                       <FormField
                         control={form.control}
-                        name="gender"
+                        name="biologicalSex"
                         render={({ field }) => {
                           return (
                             <FormItem className='flex-1'>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Sex Assigned at Birth (for BMR calculation)</label>
                               <Select
-                                name="gender"
+                                name="biologicalSex"
                                 onValueChange={field.onChange}
                               >
                                 <FormControl>
