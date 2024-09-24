@@ -27,17 +27,6 @@ interface Product {
     ingredients: Ingredient[];
 }
 
-const calculateHealthScore = (product: Product) => {
-    let score = 50 // Start at neutral
-    if (product.nutritionalFacts) {
-        score += product.nutritionalFacts.protein || 0 > 10 ? 10 : 0
-        score -= product.nutritionalFacts.saturatedFat || 0 > 5 ? 10 : 0
-        score += product.nutritionalFacts.dietaryFiber || 0 > 5 ? 10 : 0
-        score -= product.nutritionalFacts.addedSugars || 0 > 10 ? 10 : 0
-    }
-    return Math.min(Math.max(score, 0), 100) // Ensure score is between 0 and 100
-}
-
 export default async function ProductOverview({
     productId
 }: ProductOverviewProps) {
@@ -45,7 +34,6 @@ export default async function ProductOverview({
     if (!product) {
         return null;
     }
-    const healthScore = calculateHealthScore(product);
 
     return (
         <Card>
@@ -81,8 +69,8 @@ export default async function ProductOverview({
             <CardFooter>
                 <div className="w-full">
                     <h4 className="text-lg font-semibold mb-2">Health Score</h4>
-                    <Progress value={healthScore} className="w-full h-4" />
-                    <p className="text-sm text-gray-600 mt-2">Score: {healthScore}/100</p>
+                    <Progress value={product.healthScore} className="w-full h-4" />
+                    <p className="text-sm text-gray-600 mt-2">Score: {product.healthScore}/10</p>
                 </div>
             </CardFooter>
         </Card>

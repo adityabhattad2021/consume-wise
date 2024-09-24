@@ -74,46 +74,6 @@ export type DetailedProduct = Product & {
   allergens: { allergen: { name: string } }[]
 }
 
-export async function getProduct(id: number): Promise<DetailedProduct | null> {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      categories: {
-        include: {
-          category: true,
-        },
-      },
-      nutritionalFacts: true,
-      ingredients: {
-        include: {
-          ingredient: true,
-        },
-      },
-      claims: true,
-      allergens: {
-        include: {
-          allergen: true,
-        },
-      },
-    },
-  })
-
-  if (!product) return null
-
-  const detailedProduct: DetailedProduct = {
-    ...product,
-    ingredients: await Promise.all(
-      product.ingredients.map(async (pi) => ({
-        ...pi,
-        effects: await prisma.ingredientEffect.findMany({
-          where: { ingredientId: pi.ingredient.id },
-        }),
-      }))
-    ),
-  }
-
-  return detailedProduct
-}
 
 
 export async function getProductBasicInfo(id: number) {
@@ -136,6 +96,7 @@ export async function getProductOverview(id: number) {
     where: { id },
     select: {
       summary: true,
+      healthScore:true,
       nutritionalFacts: {
         select: {
           protein: true,

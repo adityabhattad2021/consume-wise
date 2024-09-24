@@ -2,8 +2,9 @@ import { JSDOM } from 'jsdom';
 import fetch from 'node-fetch';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { put } from '@vercel/blob';
-import { PrismaClient } from '@prisma/client';
+import { HealthDetail, PrismaClient } from '@prisma/client';
 import sharp from 'sharp';
+import { calculateNutrientDensity, calculateProductHealthScore } from './scores';
 
 const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
@@ -52,6 +53,11 @@ interface ProductDetails {
 		source?: string;
 	}>;
 	allergens: string[];
+	functionalBenefits: string[];
+	suitableFor: HealthDetail[]
+	notSuitableFor: HealthDetail[];
+	naturalIngredientCount:number;
+	processedIngredientCount:number;
 }
 
 async function scrapeProductImages(url: string): Promise<string[]> {
@@ -124,7 +130,7 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 		3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
 		4. Include all potential allergens visible on the product label or inferred from the ingredients.
 		5. Generate a user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective.
-		6. Do not leave any field blank. If information is not available, use "N/A" or provide a reasonable estimate based on your expert knowledge.
+		6. Do not leave any field blank. If information is not available, provide a reasonable estimate based on your expert knowledge.
 
 		Your analysis should be comprehensive, accurate, and based on the visible information in the product images. Consider the nutritional information and ingredients list as the source of truth rather than the claims on the packaging and your expert knowledge of food science and nutrition.
 
@@ -165,6 +171,11 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 			- Provide a conclusive statement on whether the product is good for consumers
 			- Evaluate whether the product's claims are true or misleading
 			- Recommend whether users should consider alternatives
+		11. functionalBenefits: Array of strings describing the functional benefits of the product
+		12. suitableFor: Array of strings describing health conditions or groups for which the product is suitable (Strictly choose from avaiable options only. Available options: ${Object.values(HealthDetail)}) (leave blank if non option applicable)
+		13. notSuitableFor: Array of strings describing health conditions or groups for which the product is not suitable (Strictly choose from avaiable options only. Available options: ${Object.values(HealthDetail)}) (leave blank if non option applicable)
+		14. naturalIngredientCount: Count of natural ingredients in the product.
+		15. processedIngredientCount: Count of processed ingredients in the product.
 
 		Provide as much detailed information as possible based on the product images and your expert knowledge. Ensure that no field is left blank and that the summary is conclusive and unbiased.`;
 
@@ -221,6 +232,8 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 			nutritionalFacts: {
 				create: productDetails.nutritionalFacts
 			},
+			healthScore:calculateProductHealthScore(productDetails.nutritionalFacts,productDetails.naturalIngredientCount,productDetails.processedIngredientCount),
+			nutritionDensity:calculateNutrientDensity(productDetails.nutritionalFacts),
 			ingredients: {
 				create: productDetails.ingredients.map((ingredient, index) => ({
 					ingredient: {
@@ -269,6 +282,9 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 					category: { connect: { id: category.id } },
 				})),
 			},
+			functionalBenefits:productDetails.functionalBenefits,
+			notSuitableFor:productDetails.notSuitableFor,
+			suitableFor:productDetails.suitableFor
 		},
 		include: {
 			nutritionalFacts: true,
@@ -310,7 +326,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/1201303/britannia-biscuits-marie-gold-2x250-g/?nc=cl-prod-list&t_pos_sec=1&t_pos_item=1&t_s=Biscuits+-+Marie+Gold';
+const productUrl = 'https://www.bigbasket.com/pd/40297523/the-whole-truth-pro-20g-protein-bar-coffee-cocoa-no-added-sugar-67-g/';
 main(productUrl);
 
 
