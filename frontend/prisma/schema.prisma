@@ -225,6 +225,7 @@ enum DietaryPreference {
   EGGITARIAN
   VEGETARIAN
   VEGAN
+  NON_VEGETARIAN
 }
 
 enum HealthGoal {

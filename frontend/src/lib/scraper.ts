@@ -326,7 +326,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40297523/the-whole-truth-pro-20g-protein-bar-coffee-cocoa-no-added-sugar-67-g/';
+const productUrl = 'https://www.bigbasket.com/pd/40263608/maggi-nutri-licious-masala-veg-atta-noodles-with-spinach-rich-in-iron-fibre-290-g';
 main(productUrl);
 
 

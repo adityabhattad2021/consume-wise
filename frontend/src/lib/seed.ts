@@ -11,7 +11,7 @@ interface Category {
 }
 
 
-async function generateSeedCategories(): Promise<Category[]> {
+export async function generateSeedCategories(): Promise<Category[]> {
     try{
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',

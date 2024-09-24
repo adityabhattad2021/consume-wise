@@ -6,26 +6,6 @@ interface ProductOverviewProps {
     productId: number;
 }
 
-interface NutritionalFacts {
-    protein: number | null;
-    saturatedFat: number | null;
-    dietaryFiber: number | null;
-    addedSugars: number | null;
-    totalFat: number | null;
-    totalCarbohydrate: number | null;
-}
-
-interface Ingredient {
-    ingredient: {
-        name: string;
-    };
-}
-
-interface Product {
-    summary: string;
-    nutritionalFacts: NutritionalFacts | null;
-    ingredients: Ingredient[];
-}
 
 export default async function ProductOverview({
     productId
@@ -70,7 +50,7 @@ export default async function ProductOverview({
                 <div className="w-full">
                     <h4 className="text-lg font-semibold mb-2">Health Score</h4>
                     <Progress value={product.healthScore} className="w-full h-4" />
-                    <p className="text-sm text-gray-600 mt-2">Score: {product.healthScore}/10</p>
+                    <p className="text-sm text-gray-600 mt-2">Score: {product.healthScore}/100</p>
                 </div>
             </CardFooter>
         </Card>
