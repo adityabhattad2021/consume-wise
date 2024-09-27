@@ -5,6 +5,7 @@ import { Leaf } from "lucide-react"
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import { auth } from "@/auth";
+import { Session } from "next-auth";
 
 
 const CommandK = dynamic(() => import('@/components/command-k'), {
@@ -60,7 +61,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 function MobileMenu({
     session
 }: {
-    session: any
+    session: Session | null;
 }) {
     return (
         <div className="md:hidden">

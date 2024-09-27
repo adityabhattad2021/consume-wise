@@ -3,7 +3,8 @@ import { PersonalizedOverview } from "@/lib/personalization"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Info } from "lucide-react"
+import { CheckCircle } from "lucide-react"
+import { NutritionalFact, Product } from "@prisma/client"
 
 const formatNutritionLabel = (key: string) => {
     return key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
@@ -52,7 +53,17 @@ export default async function ProductNutrition({
     )
 }
 
-function NutritionFacts({ product }: { product: any }) {
+
+
+type ProductWithNutritionalFacts = Partial<Product> & {
+    nutritionalFacts: Partial<NutritionalFact> | null;
+}
+
+interface NutritionalFactsProps{
+    product:ProductWithNutritionalFacts
+}
+
+function NutritionFacts({ product }: NutritionalFactsProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {nutritionKeys.map((nutrient) => (
@@ -60,7 +71,7 @@ function NutritionFacts({ product }: { product: any }) {
                     <NutrientItem
                         key={nutrient}
                         nutrient={nutrient}
-                        value={product.nutritionalFacts[nutrient as keyof typeof product.nutritionalFacts]}
+                        value={product.nutritionalFacts[nutrient as keyof typeof product.nutritionalFacts]!}
                     />
                 )
             ))}

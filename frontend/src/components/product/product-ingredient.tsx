@@ -22,7 +22,7 @@ export default async function ProductIngredient({
             <CardHeader>
                 <CardTitle className="text-xl font-bold">Ingredients</CardTitle>
                 <CardDescription>
-                    This is generated based on the product's ingredients list in the image.
+                    This is generated based on the product&apos;s ingredients list in the image.
                 </CardDescription>
             </CardHeader>
             <CardContent>

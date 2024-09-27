@@ -19,7 +19,7 @@ export default async function ProductClaim({
             <CardHeader>
                 <CardTitle className="text-xl font-bold">Product Claims</CardTitle>
                 <CardDescription>
-                    This is generated based on the product's claims in the image.
+                    This is generated based on the product&apos;s claims in the image.
                 </CardDescription>
             </CardHeader>
             <CardContent>
