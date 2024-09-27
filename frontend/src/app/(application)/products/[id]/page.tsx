@@ -13,7 +13,7 @@ import ProductClaim from '@/components/product/product-claim'
 import { auth } from '@/auth'
 import { getCompleteProductInsights, PersonalizedOverview } from '@/lib/personalization'
 
-
+export const maxDuration = 40;
 
 export default async function ProductDetailsPage({
   params
