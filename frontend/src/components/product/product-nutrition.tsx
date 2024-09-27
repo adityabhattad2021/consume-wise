@@ -1,6 +1,7 @@
 import { getProductNutrition } from "@/lib/products";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PersonalizedOverview } from "@/lib/personalization";
 
 
 const formatNutritionLabel = (key: string) => {
@@ -22,15 +23,18 @@ const nutritionKeys = [
 
 interface ProductNutritionProps{
     productId:number;
+    personalizedOverviewPromise: Promise<PersonalizedOverview | null> | null;
 }
 
 export default async function ProductNutrition({
-    productId
-}:ProductNutritionProps) {
+    productId,
+    personalizedOverviewPromise
+}: ProductNutritionProps) {
     const product = await getProductNutrition(productId);
-    if(!product){
+    if (!product) {
         return null;
     }
+    const personalizedOverview = await personalizedOverviewPromise;
 
     return (
         <Card>
@@ -39,6 +43,16 @@ export default async function ProductNutrition({
                 <CardDescription>Per serving ({product.servingSize} {product.servingUnit})</CardDescription>
             </CardHeader>
             <CardContent>
+                {personalizedOverview?.nutrientHighlights && (
+                    <div>
+                        <h3 className="text-lg font-semibold mb-3">Nutrient Highlights</h3>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                            {personalizedOverview.nutrientHighlights.map((highlight, index) => (
+                                <li key={index}>{highlight.nutrient}: {highlight.benefit}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     {nutritionKeys.map((nutrient) => (
                         product.nutritionalFacts && product.nutritionalFacts[nutrient as keyof typeof product.nutritionalFacts] !== null && (

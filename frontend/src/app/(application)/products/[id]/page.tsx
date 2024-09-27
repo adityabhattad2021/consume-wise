@@ -10,6 +10,8 @@ import ProductOverview from '@/components/product/product-overview'
 import ProductNutrition from '@/components/product/product-nutrition'
 import ProductIngredient from '@/components/product/product-ingredient'
 import ProductClaim from '@/components/product/product-claim'
+import { auth } from '@/auth'
+import { getCompleteProductInsights, PersonalizedOverview } from '@/lib/personalization'
 
 
 
@@ -28,6 +30,11 @@ export default async function ProductDetailsPage({
     notFound()
   }
 
+  let personalizedOverview: Promise<PersonalizedOverview|null> | null = null;
+  const session = await auth();
+  if (session?.user.id) {
+    personalizedOverview = getCompleteProductInsights(session.user.id, productId);
+  }
 
   return (
     <div className="container mx-auto px-10 md:px-24 py-8 pt-32">
@@ -51,13 +58,13 @@ export default async function ProductDetailsPage({
 
             <TabsContent value="overview">
               <Suspense fallback={<ProductOverviewSkeleton />}>
-                <ProductOverview productId={productId} />
+                <ProductOverview productId={productId} personalizedOverviewPromise={personalizedOverview} />
               </Suspense>
             </TabsContent>
 
             <TabsContent value="nutrition">
               <Suspense fallback={<ProductNutritionSkeleton />}>
-                <ProductNutrition productId={productId} />
+                <ProductNutrition productId={productId} personalizedOverviewPromise={personalizedOverview} />
               </Suspense>
             </TabsContent>
 

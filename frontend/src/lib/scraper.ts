@@ -106,7 +106,7 @@ function extractHighQualityImages(doc: Document): string[] {
 
 async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDetails> {
 	try {
-		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+		const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-002", generationConfig: { responseMimeType: "application/json" } });
 
 		const imageParts = await Promise.all(imageUrls.map(async (url) => {
 			const response = await fetch(url);
@@ -122,62 +122,86 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 		const availableCategories = await prisma.category.findMany({})
 		const categoryArryString = `[${availableCategories.join(', ')}]`
 
-		const prompt = `As an expert nutritionist, analyze these product images, focusing on the nutritional information and ingredient list. Provide a thorough, evidence-based analysis. Focus on the actual nutritional content and ingredients rather than marketing claims. Highlight any discrepancies between claims and reality. Give as much information as possible to the best of your knowledge.
+		const prompt = `As an expert nutritionist, meticulously analyze the provided product images, prioritizing the nutritional information and ingredient list. Deliver a comprehensive, evidence-based analysis grounded in scientific principles. The mains source of truth are nutritional content and ingredients, disregarding marketing claims.  Identify and explain any discrepancies between advertised claims and the product's actual composition.  Provide as much detailed information as possible within your area of expertise.
 
-		Additional guidelines:
-		1. Ensure all numerical values are provided as numbers, not strings.
-		2. For the 'ingredients' array, provide as much detail as possible for each ingredient, including potential risks and effects.
-		3. Critically evaluate all product claims, comparing them to the actual nutritional content and ingredients.
-		4. Include all potential allergens visible on the product label or inferred from the ingredients.
-		5. Generate a user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective.
-		6. Do not leave any field blank. If information is not available, provide a reasonable estimate based on your expert knowledge.
+		**Specific Instructions:**
 
-		Your analysis should be comprehensive, accurate, and based on the visible information in the product images. Consider the nutritional information and ingredients list as the source of truth rather than the claims on the packaging and your expert knowledge of food science and nutrition.
+		1. **Numerical Precision:**  Represent all numerical values as numbers, not strings. Use -1 if a numerical value is not available.
+		2. **Ingredient Details:** For each ingredient listed, furnish a thorough description encompassing its common uses, potential health risks, and scientifically-backed effects on the body.  Provide details about the severity and duration of any effects. This information will be used to populate the \`Ingredient\` and \`IngredientEffect\` models.
+		3. **Claim Verification:** Critically evaluate all product claims, rigorously comparing them to the actual nutritional content and ingredients.  Provide a clear verification status (e.g., "Verified", "Unverified", "Misleading") with a detailed explanation and source for each claim. This will be used for the \`ProductClaim\` model.
+		4. **Allergen Identification:**  Explicitly list all potential allergens discernible on the product label or deducible from the ingredients. This will populate the \`Allergen\` model (assuming a separate process matches these names to existing \`Allergen\` records or creates new ones).
+		5. **Expert Summary:** Compose a user-friendly, informative, and easily digestible summary of the product from a nutritionist's perspective. This summary should be a concise string that will be directly stored in the \`summary\` field of the \`Product\` model. Adhere to the following criteria:
+			* ... (Summary criteria remain the same)
+		6. **Complete Information:**  Do not leave any field blank in the JSON structure. If specific information is unavailable from the product images, provide a reasonable estimate based on your expert knowledge. 
 
-		The result should be in this JSON format:
 
-		1. name: Full product name
-		2. brand: Brand name
-		3. categories: Array of relevant product categories (choose from: ${categoryArryString})
-		4. servingSize: Number representing serving size (use -1 if not available)
-		5. servingUnit: Unit of measurement for serving size (use "N/A" if not available)
-		6. nutritionalFacts: Object containing the following nutritional information (all as numbers, use -1 if not available):
-		- calories, totalFat, saturatedFat, transFat, cholesterol, sodium, totalCarbohydrate,
-			dietaryFiber, totalSugars, addedSugars, protein, vitaminA, vitaminC, calcium, iron
-		7. ingredients: Array of objects, each containing:
-		- name: Ingredient name
-		- description: Brief description of the ingredient
-		- commonUses: Common uses of the ingredient in food products (as a string)
-		- potentialRisks: Any potential health risks or side effects
-		- effects: Array of objects describing the effects of the ingredient, each containing:
-			- effectType: Type of effect (e.g., "health benefit", "side effect")
-			- description: Description of the effect
-			- scientificEvidence: Brief summary of scientific evidence supporting the effect
-			- severity: Severity of the effect 
-			- duration: Duration of the effect
-		8. claims: Array of objects, each containing:
-		- claim: The product claim
-		- verificationStatus: Status of claim verification (e.g., "Verified", "Unverified", "Misleading")
-		- explanation: Explanation or context for the verification status
-		- source: Source of the claim or its verification
-		9. allergens: Array of potential allergens present in the product
-		10. summary: A user-friendly, informative, and easily readable summary of the product from a nutritionist's perspective. This summary should:
-			- Be written from a third-person point of view
-			- Not promote the product
-			- Highlight key nutritional aspects
-			- Discuss potential health benefits and risks
-			- Offer recommendations for consumption
-			- Use language that is accessible to the general public while maintaining scientific accuracy
-			- Provide a conclusive statement on whether the product is good for consumers
-			- Evaluate whether the product's claims are true or misleading
-			- Recommend whether users should consider alternatives
-		11. functionalBenefits: Array of strings describing the functional benefits of the product
-		12. suitableFor: Array of strings describing health conditions or groups for which the product is suitable (Strictly choose from avaiable options only. Available options: ${Object.values(HealthDetail)}) (leave blank if non option applicable)
-		13. notSuitableFor: Array of strings describing health conditions or groups for which the product is not suitable (Strictly choose from avaiable options only. Available options: ${Object.values(HealthDetail)}) (leave blank if non option applicable)
-		14. naturalIngredientCount: Count of natural ingredients in the product.
-		15. processedIngredientCount: Count of processed ingredients in the product.
+		**Example Data Structure (JSON):**
 
-		Provide as much detailed information as possible based on the product images and your expert knowledge. Ensure that no field is left blank and that the summary is conclusive and unbiased.`;
+		The JSON output must strictly conform to the following structure to be compatible with the database schema:
+
+		{
+		"name": "string",
+		"brand": "string",
+		"categories": string[],
+		"servingSize": "number | null", 
+		"servingUnit": "string | null",
+		"createdAt": "string", //  Date string (ISO 8601)
+		"updatedAt": "string", // Date string (ISO 8601)
+		"nutritionalFacts": {
+			"calories": "number | null",
+			"totalFat": "number | null",
+			"saturatedFat": "number | null",
+			"transFat": "number | null",
+			"cholesterol": "number | null",
+			"sodium": "number | null",
+			"totalCarbohydrate": "number | null",
+			"dietaryFiber": "number | null",
+			"totalSugars": "number | null",
+			"addedSugars": "number | null",
+			"protein": "number | null",
+			"vitaminA": "number | null",
+			"vitaminC": "number | null",
+			"calcium": "number | null",
+			"iron": "number | null"
+		},
+		"ingredients": [
+			{
+			"name": "string",
+			"description": "string | null",
+			"commonUses": "string | null",
+			"potentialRisks": "string | null",
+			"effects": [
+				{
+				"effectType": "string | null",
+				"description": "string | null",
+				"scientificEvidence": "string | null",
+				"severity": "string | null",
+				"duration": "string | null"
+				}
+			]
+			}
+		],
+		"claims": [
+			{
+			"claim": "string",
+			"verificationStatus": "string | null",
+			"explanation": "string | null",
+			"source": "string | null"
+			}
+		],
+		"allergens": ["string"],
+		"summary": "string",
+		"functionalBenefits": ["string"],
+		"suitableFor": ["string"],  Options: ${Object.values(HealthDetail)}
+		"notSuitableFor": ["string"], Options: ${Object.values(HealthDetail)}
+		"naturalIngredientCount": "number",
+		"processedIngredientCount": "number"
+		}
+
+		**Available Categories:** ${categoryArryString}
+
+		Analyze the product images thoroughly and provide a comprehensive, scientifically-sound analysis.  Prioritize accuracy and evidence-based reasoning over marketing claims. Ensure the JSON output strictly adheres to the specified structure for seamless integration with the database schema.
+		`;
 
 		const result = await model.generateContent([prompt, ...imageParts]);
 		const response = result.response;
@@ -326,7 +350,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40263608/maggi-nutri-licious-masala-veg-atta-noodles-with-spinach-rich-in-iron-fibre-290-g';
+const productUrl = 'https://www.bigbasket.com/pd/40292142/health-horizons-plant-protein-bites-cocoa-flavour-for-energy-fitness-25-g/';
 main(productUrl);
 
 

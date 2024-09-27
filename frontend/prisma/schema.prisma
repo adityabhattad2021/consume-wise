@@ -33,7 +33,7 @@ model Product {
   functionalBenefits String[]
   suitableFor        HealthDetail[]
   notSuitableFor     HealthDetail[]
-  recommendations    UserRecommendation[]
+  personalOverviews    PersonalizedOverview[]
 }
 
 model Category {
@@ -154,14 +154,14 @@ model User {
 
   // Fields for health based recommendation
   healthDetails      HealthDetail[]
-  dailyCalorieNeeds  Float
+  dailyCalorieNeeds  Float?
 
   // Can be added later on.
   // macroNutrientRatio MacroNutrientRatio?
   // microNutrientNeeds MicroNutrientNeed[]
   // Ignoring allergies for now.
 
-  recommenations UserRecommendation[]
+  personalOverviews PersonalizedOverview[]
 }
 
 // model MacroNutrientRatio {
@@ -182,16 +182,24 @@ model User {
 //   user     User   @relation(fields: [userId], references: [id])
 // }
 
-model UserRecommendation {
+model PersonalizedOverview {
   id           Int      @id @default(autoincrement())
   userId       String
   productId    Int
-  matchScore   Float
-  reasonString String[]
-  date         DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
-  product      Product  @relation(fields: [productId], references: [id])
+  overview String?
+  matchScore Int?
+  suitabilityReasons Json[]
+  safeConsumptionGuideline Json
+  healthGoalImpacts Json[]
+  nutrientHighlights Json[]
+  
+  product Product @relation(fields: [productId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId, productId])
 }
+
 
 enum BiologicalSex {
   MALE

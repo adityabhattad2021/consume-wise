@@ -18,8 +18,7 @@ interface NavbarProps {
 
 export default async function Navbar({ className }: NavbarProps) {
 
-    const session  = await auth();
-    const profileHref = session?.user ? '/profile' : 'auth/login';
+    const session = await auth();
 
     return (
         <nav className={cn("fixed top-6 inset-x-0 mx-auto w-[88%] z-50", className)}>
@@ -29,12 +28,18 @@ export default async function Navbar({ className }: NavbarProps) {
                     <h1 className="text-xl md:text-2xl font-bold">ConsumeWise</h1>
                 </Link>
                 <div className="hidden md:flex items-center space-x-4 gap-4">
-                    <NavLink href="#">Add a product</NavLink>
-                    <NavLink href={profileHref}>Profile</NavLink>
+                    {session?.user ? (
+                        <>
+                            <NavLink href="/profile">Profile</NavLink>
+                            <NavLink href="#">Add a product</NavLink>
+                        </>
+                    ) : (
+                        <NavLink href="/auth/login">Login</NavLink>
+                    )}
                     <CommandK />
                 </div>
-                <MobileMenu 
-                    profileHref={profileHref}
+                <MobileMenu
+                    session={session}
                 />
             </div>
         </nav>
@@ -53,9 +58,9 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 }
 
 function MobileMenu({
-    profileHref
-}:{
-    profileHref:string
+    session
+}: {
+    session: any
 }) {
     return (
         <div className="md:hidden">
@@ -73,8 +78,15 @@ function MobileMenu({
                     <div className="flex flex-col space-y-6 mt-6">
                         <h3 className="text-xl font-semibold border-b border-secondary-foreground/20 pb-2">ConsumeWise</h3>
                         <div className="text-xl font-semibold pt-2">
-                            <MobileNavLink href="#">Add a product</MobileNavLink>
-                            <MobileNavLink href={profileHref}>Profile</MobileNavLink>
+
+                            {session?.user ? (
+                                <>
+                                    <MobileNavLink href="/profile">Profile</MobileNavLink>
+                                    <MobileNavLink href="#">Add a product</MobileNavLink>
+                                </>
+                            ) : (
+                                <MobileNavLink href="/auth/login">Login</MobileNavLink>
+                            )}
                         </div>
                     </div>
                 </SheetContent>
