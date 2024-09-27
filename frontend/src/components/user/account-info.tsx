@@ -1,21 +1,20 @@
-import { ReactNode } from 'react';
-import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalizeWords } from "@/lib/capitalize_word";
 import prisma from "@/lib/prisma";
 import Image from "next/image";
-import { redirect } from "next/navigation";
-import {  Activity, Goal } from 'lucide-react';
+import { Activity, Goal } from 'lucide-react';
 import { SignOutButton } from '@/components/user/signout-button';
+import { CustomSection as Section } from '@/components/user/section';
+import { Button } from "@/components/ui/button";
 
-interface AccountInfoProps{
-    userId:string
+interface AccountInfoProps {
+    userId: string
 }
 
 export async function AccountInfo({
     userId
-}:AccountInfoProps) {
-    
+}: AccountInfoProps) {
+
     const user = await prisma.user.findUnique({
         where: {
             id: userId
@@ -28,7 +27,7 @@ export async function AccountInfo({
                 <CardHeader className="flex flex-row justify-between items-center gap-3">
                     <CardTitle className="text-2xl font-bold text-wrap">Account Information</CardTitle>
                     <div className="space-x-2">
-                       <SignOutButton/>
+                        <SignOutButton />
                     </div>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-3 mb-10">
@@ -42,6 +41,9 @@ export async function AccountInfo({
                         />
                         <h2 className="text-xl font-semibold mb-2">{user?.name}</h2>
                         <p className="text-sm text-gray-600 mb-4">{user?.email}</p>
+                        <div className="flex justify-end w-full">
+                            <Button variant="ghost" className="mb-4">Edit Profile</Button>
+                        </div>
                         <div className="w-full space-y-2">
                             <InfoItem label="Age" value={`${user?.age} years`} />
                             <InfoItem label="Height" value={`${user?.height} cm`} />
@@ -56,11 +58,13 @@ export async function AccountInfo({
                         <Section
                             icon={<Activity className="w-6 h-6" />}
                             title="Health Details"
+                            sectionKey="healthDetails"
                             items={user?.healthDetails || []}
                         />
                         <Section
                             icon={<Goal className="w-6 h-6" />}
                             title="Health Goals"
+                            sectionKey="healthGoals"
                             items={user?.healthGoals || []}
                         />
                     </div>
@@ -86,26 +90,4 @@ function InfoItem({ label, value }: InfoItemProps) {
 }
 
 
-interface SectionProps{
-    icon:ReactNode;
-    title:string;
-    items:string[];
-}
 
-function Section({ icon, title, items }: SectionProps) {
-    return (
-        <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center mb-4">
-                {icon}
-                <h3 className="text-lg font-semibold ml-2">{title}</h3>
-            </div>
-            <ul className="space-y-2">
-                {items.map((item: any, index: any) => (
-                    <li key={index} className="bg-white rounded-md p-2 shadow-sm">
-                        {capitalizeWords(item)}
-                    </li>
-                ))}
-            </ul>
-        </div>
-    )
-};

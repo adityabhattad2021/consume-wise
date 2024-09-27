@@ -88,7 +88,7 @@ export default function OnboardingForm() {
 
   async function onSubmit(values: z.infer<typeof userFormSchema>) {
     try{
-      await axios.post('/api/onboard', values)
+      await axios.post('/api/user/new', values)
     }catch(err){
       console.log('login unsuccessful.');
     }
