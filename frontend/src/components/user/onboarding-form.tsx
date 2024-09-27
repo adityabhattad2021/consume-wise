@@ -123,7 +123,7 @@ export default function OnboardingForm() {
                         render={({ field }) => {
                           return (
                             <FormItem className='flex-1'>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Sex Assigned at Birth (for BMR calculation)</label>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Gender (for BMR calculation)</label>
                               <Select
                                 name="biologicalSex"
                                 onValueChange={field.onChange}
