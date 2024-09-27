@@ -1,6 +1,6 @@
 import { Suspense } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { getProductIngredients } from "@/lib/products";
 import { AlertTriangle, Leaf } from "lucide-react";
 
@@ -20,7 +20,10 @@ export default async function ProductIngredient({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Ingredients</CardTitle>
+                <CardTitle className="text-xl font-bold">Ingredients</CardTitle>
+                <CardDescription>
+                    This is generated based on the product's ingredients list in the image.
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <Suspense fallback={<div>Loading...</div>}>

@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProductClaims } from "@/lib/products";
 import { Check, Info } from "lucide-react";
 
@@ -17,7 +17,10 @@ export default async function ProductClaim({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Product Claims</CardTitle>
+                <CardTitle className="text-xl font-bold">Product Claims</CardTitle>
+                <CardDescription>
+                    This is generated based on the product's claims in the image.
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 {claims.map((claim, index) => (

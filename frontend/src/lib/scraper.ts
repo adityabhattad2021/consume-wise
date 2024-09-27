@@ -106,7 +106,7 @@ function extractHighQualityImages(doc: Document): string[] {
 
 async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDetails> {
 	try {
-		const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-002", generationConfig: { responseMimeType: "application/json" } });
+		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
 
 		const imageParts = await Promise.all(imageUrls.map(async (url) => {
 			const response = await fetch(url);
@@ -122,18 +122,16 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 		const availableCategories = await prisma.category.findMany({})
 		const categoryArryString = `[${availableCategories.join(', ')}]`
 
-		const prompt = `As an expert nutritionist, meticulously analyze the provided product images, prioritizing the nutritional information and ingredient list. Deliver a comprehensive, evidence-based analysis grounded in scientific principles. The mains source of truth are nutritional content and ingredients, disregarding marketing claims.  Identify and explain any discrepancies between advertised claims and the product's actual composition.  Provide as much detailed information as possible within your area of expertise.
+		const prompt = `Imagine you're a nutrition expert browsing the grocery store. You've got a product in front of you – a package, a box, whatever it is. Let's analyze this product like you're helping a friend make a healthy choice. 
 
-		**Specific Instructions:**
+		**Here's what I need from you:**
 
-		1. **Numerical Precision:**  Represent all numerical values as numbers, not strings. Use -1 if a numerical value is not available.
-		2. **Ingredient Details:** For each ingredient listed, furnish a thorough description encompassing its common uses, potential health risks, and scientifically-backed effects on the body.  Provide details about the severity and duration of any effects. This information will be used to populate the \`Ingredient\` and \`IngredientEffect\` models.
-		3. **Claim Verification:** Critically evaluate all product claims, rigorously comparing them to the actual nutritional content and ingredients.  Provide a clear verification status (e.g., "Verified", "Unverified", "Misleading") with a detailed explanation and source for each claim. This will be used for the \`ProductClaim\` model.
-		4. **Allergen Identification:**  Explicitly list all potential allergens discernible on the product label or deducible from the ingredients. This will populate the \`Allergen\` model (assuming a separate process matches these names to existing \`Allergen\` records or creates new ones).
-		5. **Expert Summary:** Compose a user-friendly, informative, and easily digestible summary of the product from a nutritionist's perspective. This summary should be a concise string that will be directly stored in the \`summary\` field of the \`Product\` model. Adhere to the following criteria:
-			* ... (Summary criteria remain the same)
-		6. **Complete Information:**  Do not leave any field blank in the JSON structure. If specific information is unavailable from the product images, provide a reasonable estimate based on your expert knowledge. 
-
+		**Focus on the Facts:**  Pay close attention to the nutritional information and ingredient list.  Forget about fancy marketing – we're looking for the real deal. 
+		**Tell me about the Ingredients:**  For each ingredient, give me a rundown on what it is, what it's typically used for, and any potential health effects.  Think about things like whether it's beneficial, if there are any risks to watch out for, and how long these effects might last.
+		**Truth in Advertising:** Check out the claims on the packaging. Do they match up with the ingredients and the nutrition facts? Let me know if the claims are verified, unverified, or even misleading. 
+		**Allergy Alert:** Are there any potential allergens listed on the package or that you can identify from the ingredients? 
+		**Summarize It for Me:** Give me a quick summary of the product from a nutritionist's point of view. Keep it simple and clear so anyone can understand it. 
+		**Complete the Picture:** Let's fill in all the information in the JSON structure. If something's missing, give me your best guess based on your expertise. 
 
 		**Example Data Structure (JSON):**
 
@@ -145,8 +143,6 @@ async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDet
 		"categories": string[],
 		"servingSize": "number | null", 
 		"servingUnit": "string | null",
-		"createdAt": "string", //  Date string (ISO 8601)
-		"updatedAt": "string", // Date string (ISO 8601)
 		"nutritionalFacts": {
 			"calories": "number | null",
 			"totalFat": "number | null",
@@ -350,7 +346,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40292142/health-horizons-plant-protein-bites-cocoa-flavour-for-energy-fitness-25-g/';
+const productUrl = 'https://www.bigbasket.com/pd/1204027/haldirams-namkeen-tasty-nuts-3x150-g/';
 main(productUrl);
 
 
