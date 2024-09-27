@@ -1,5 +1,5 @@
 import { Carrot, Heart, Leaf, Scale } from "lucide-react"
-import { BiologicalSex, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from '@/form_schema/user'
+import { BiologicalSex, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from '@/api_schema/user/common'
 
 interface Field {
     name: string

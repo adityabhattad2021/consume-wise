@@ -1,25 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalizeWords } from "@/lib/capitalize_word";
-import prisma from "@/lib/prisma";
 import Image from "next/image";
 import { Activity, Goal } from 'lucide-react';
 import { SignOutButton } from '@/components/user/signout-button';
 import { CustomSection as Section } from '@/components/user/section';
-import { Button } from "@/components/ui/button";
+import UpdateProfileDialog from "./update-profile-dialog";
+import { redirect } from "next/navigation";
+import { User } from "@prisma/client";
+
 
 interface AccountInfoProps {
-    userId: string
+    userPromise: Promise<User | null>
 }
 
 export async function AccountInfo({
-    userId
+    userPromise
 }: AccountInfoProps) {
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId
-        }
-    });
+    const user = await userPromise;
+    if (!user) {
+        redirect("/");
+    }
 
     return (
         <div className="mx-auto px-4 py-8">
@@ -41,17 +42,19 @@ export async function AccountInfo({
                         />
                         <h2 className="text-xl font-semibold mb-2">{user?.name}</h2>
                         <p className="text-sm text-gray-600 mb-4">{user?.email}</p>
-                        <div className="flex justify-end w-full">
-                            <Button variant="ghost" className="mb-4">Edit Profile</Button>
+                        <div className="flex justify-end w-full space-y-2">
+                            <UpdateProfileDialog
+                                user={user}
+                            />
                         </div>
                         <div className="w-full space-y-2">
                             <InfoItem label="Age" value={`${user?.age} years`} />
                             <InfoItem label="Height" value={`${user?.height} cm`} />
                             <InfoItem label="Weight" value={`${user?.weight} kg`} />
-                            <InfoItem label="Gender" value={`${capitalizeWords(user?.biologicalSex!)}`} />
+                            <InfoItem label="Gender" value={`${capitalizeWords(user?.biologicalSex || '')}`} />
                             <InfoItem label="Daily Calorie Needs" value={`${user?.dailyCalorieNeeds} kcal`} />
-                            <InfoItem label="Activity Level" value={capitalizeWords(user?.activityLevel!)} />
-                            <InfoItem label="Dietary Preference" value={capitalizeWords(user?.dietaryPreference!)} />
+                            <InfoItem label="Activity Level" value={capitalizeWords(user?.activityLevel || '')} />
+                            <InfoItem label="Dietary Preference" value={capitalizeWords(user?.dietaryPreference || '')} />
                         </div>
                     </div>
                     <div className="col-span-1 md:col-span-2 space-y-6">

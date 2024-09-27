@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
-import Skeleton from "@/components/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountInfo } from "@/components/user/account-info";
+import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -12,6 +12,11 @@ export default async function ProfilePage() {
     if(!session?.user){
         redirect("/")
     }
+    const userPromise = prisma.user.findUnique({
+        where: {
+            id: session.user.id
+        }
+    });
 
     return (
         <div className="mx-auto px-10 md:px-24 py-8 pt-36">
@@ -24,19 +29,24 @@ export default async function ProfilePage() {
                 </p>
             </div>
             <Tabs className="space-y-6 mt-6" defaultValue={"accountInfo"}>
-                <TabsList className="w-full grid grid-cols-2 gap-2" >
-                    <TabsTrigger value="accountInfo">Account Information</TabsTrigger>
-                    <TabsTrigger value="consumptionAnalysis">
+                <TabsList className="w-full grid grid-cols-2 gap-2 h-10" >
+                    <TabsTrigger value="accountInfo" className="h-full">Account Information</TabsTrigger>
+                    <TabsTrigger value="consumptionAnalysis" className="h-full">
                         Consumption Analysis
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="accountInfo">
                     <Suspense fallback={<AccountInfoSkeleton/>}>
-                        <AccountInfo userId={session.user.id!} />
+                        <AccountInfo userPromise={userPromise} />
                     </Suspense>
                 </TabsContent>
                 <TabsContent value="consumptionAnalysis">
-                    TODO
+                    <div className="h-full w-full flex flex-col justify-center items-center">
+                        <h1 className="text-4xl font-bold">Consumption Analysis</h1>
+                        <p className="text-lg text-muted-foreground">
+                            WIP⚒️
+                        </p>
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
-import { userFormSchema } from '@/form_schema/user'
+import { newUserSchme } from '@/api_schema/user/new'
 import { triggerConfetti } from "@/lib/confetti";
 import { steps } from './steps'
 import {
@@ -19,7 +19,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
 import { capitalizeWords } from '@/lib/capitalize_word'
 import axios from 'axios';
 import Link from 'next/link'
@@ -56,8 +62,8 @@ const Header = memo(function Header({ step, totalSteps }: HeaderProps) {
 export default function OnboardingForm() {
   const [step, setStep] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
-  const form = useForm<z.infer<typeof userFormSchema>>({
-    resolver: zodResolver(userFormSchema),
+  const form = useForm<z.infer<typeof newUserSchme>>({
+    resolver: zodResolver(newUserSchme),
     defaultValues: {
       biologicalSex: undefined,
       age: undefined,
@@ -86,7 +92,7 @@ export default function OnboardingForm() {
     }
   }
 
-  async function onSubmit(values: z.infer<typeof userFormSchema>) {
+  async function onSubmit(values: z.infer<typeof newUserSchme>) {
     try{
       await axios.post('/api/user/new', values)
     }catch(err){
@@ -172,8 +178,8 @@ export default function OnboardingForm() {
                     </div>
 
 
-                    {/* Weight */}
                     <div className='flex flex-col sm:flex-row gap-3 mb-3'>
+                    {/* Weight */}
                       <FormField
                         control={form.control}
                         name='weight'
@@ -195,6 +201,8 @@ export default function OnboardingForm() {
                           )
                         }}
                       />
+
+                      {/* Height */}
                       <FormField
                         control={form.control}
                         name='height'

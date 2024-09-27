@@ -2,26 +2,14 @@ import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { type Session } from "next-auth";
-import { BiologicalSex, HealthDetail, ActivityLevel, DietaryPreference, HealthGoal } from "@/form_schema/user";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { updateUserSchema } from "@/api_schema/user/update";
 
 
 interface NextAuthRequest extends NextRequest {
     auth: Session | null;
 }
 
- const userSchema = z.object({
-    biologicalSex: BiologicalSex.optional(),
-    age: z.number().optional(),
-    weight: z.string().optional(),
-    height: z.string().optional(),
-    healthDetails: z.array(HealthDetail).optional(),
-    activityLevel: ActivityLevel.optional(),
-    dietaryPreference: DietaryPreference.optional(),
-    nutritionKnowledge: z.string().optional(),
-    healthGoals: z.array(HealthGoal).optional(),
-});
 
 export const POST = auth(async function POST(req:NextAuthRequest){
     try{
@@ -31,7 +19,7 @@ export const POST = auth(async function POST(req:NextAuthRequest){
         
         const rawData = await req.json();
 
-        const validationResult = userSchema.safeParse(rawData);
+        const validationResult = updateUserSchema.safeParse(rawData);
 
         if(!validationResult.success){
             return NextResponse.json({message:"Invalid data",errors:validationResult.error.errors},{status:400})
@@ -40,7 +28,7 @@ export const POST = auth(async function POST(req:NextAuthRequest){
 
         const data = validationResult.data;
         
-        const transformedData: any = {};
+        const transformedData = {};
 
         const fieldsToUpdate = [
             'biologicalSex',
@@ -56,11 +44,10 @@ export const POST = auth(async function POST(req:NextAuthRequest){
 
         fieldsToUpdate.forEach(field => {
             if (data[field as keyof typeof data] !== undefined) {
+                // @ts-expect-error Don't know how to properly type this
                 transformedData[field] = field === 'weight' || field === 'height' ? parseFloat(data[field as keyof typeof data] as string) : field === 'nutritionKnowledge' ? parseInt(data[field as keyof typeof data] as string) : data[field as keyof typeof data];
             }
         });
-
-        console.log(transformedData);
 
         await prisma.user.update({
             where:{

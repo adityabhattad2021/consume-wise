@@ -1,4 +1,4 @@
-import { z } from "zod";
+import {z} from "zod";
 
 export const BiologicalSex = z.enum(["MALE", "FEMALE"]);
 
@@ -46,17 +46,3 @@ export const HealthGoal = z.enum([
     "INCREASED_ENERGY"
 ]);
 
-
-export const userFormSchema = z.object({
-    biologicalSex: BiologicalSex,
-    age: z.string(),
-    weight: z.string(),
-    height: z.string(),
-    healthDetails: z.array(HealthDetail).default([HealthDetail.enum.NORMAL]),
-    activityLevel: ActivityLevel,
-    dietaryPreference: DietaryPreference,
-    nutritionKnowledge: z.string(),
-    healthGoals: z.array(HealthGoal).min(1),
-});
-
-export type UserFormData = z.infer<typeof userFormSchema>;

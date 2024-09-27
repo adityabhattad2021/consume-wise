@@ -1,9 +1,9 @@
 import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { userFormSchema } from "@/form_schema/user";
 import { type Session } from "next-auth";
 import { calculateDailyCalorieNeeds } from "@/lib/scores";
+import { newUserSchme } from "@/api_schema/user/new";
 
 interface NextAuthRequest extends NextRequest {
     auth: Session | null;
@@ -26,7 +26,7 @@ export const POST = auth(async function POST(req: NextAuthRequest) {
         }
         const rawData = await req.json();
         
-        const validationResult = userFormSchema.safeParse(rawData);
+        const validationResult = newUserSchme.safeParse(rawData);
 
         if (!validationResult.success) {
             return NextResponse.json({ message: "Invalid data", errors: validationResult.error.errors }, { status: 400 });

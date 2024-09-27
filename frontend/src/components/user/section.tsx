@@ -94,7 +94,7 @@ export function CustomSection({ icon, title, items, sectionKey }: SectionProps) 
                 </div>
             </div>
             <ul className="space-y-2">
-                {items.map((item: any, index: any) => (
+                {items.map((item: string, index: number) => (
                     <li key={index} className="bg-white rounded-md p-2 shadow-sm flex flex-row justify-between items-center">
                         {capitalizeWords(item)}
                         <Button
