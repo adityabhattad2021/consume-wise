@@ -148,12 +148,12 @@ model User {
   activityLevel      ActivityLevel?
   dietaryPreference  DietaryPreference?
   nutritionKnowledge Int?
-  healthGoals        HealthGoal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Fields for health based recommendation
+  healthGoals        HealthGoal[]
   healthDetails     HealthDetail[]
   dailyCalorieNeeds Float?
 

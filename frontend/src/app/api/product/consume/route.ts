@@ -27,12 +27,28 @@ export const POST = auth(async function POST(req:NextAuthRequest){
 
         const data = validationResult.data;
 
+        const user = await prisma.user.findUnique({
+            where:{
+                id:req.auth.user.id
+            }
+        })
+
+        if(!user){
+            return NextResponse.json({message:"User not found"},{status:404})
+        }
+
         const transformedData = {
             productId:data.productId,
             quantity:parseInt(data.quantity),
             duration:parseInt(data.duration),
-            userId:req.auth.user.id
+            userId:user.id
         }
+
+        await prisma.consumption.create({
+            data:{
+                ...transformedData,
+            }
+        })
 
         return NextResponse.json({message:"Consumption logged successfully"},{status:200})
     }catch(error){
