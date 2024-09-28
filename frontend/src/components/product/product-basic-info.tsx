@@ -1,19 +1,24 @@
 import Image from 'next/image'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Button } from "@/components/ui/button"
 import { Suspense } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card } from '@/components/ui/card';
+import ConsumeProduct from '@/components/product/consume-product';
+
 
 
 interface ProductBasicInfoProps {
     product: {
+        id: number;
         imageUrl: string[]
         name: string;
     }
+    isLoggedIn: boolean;
 }
 
 export default function ProductBasicInfo({
-    product
+    product,
+    isLoggedIn
 }: ProductBasicInfoProps) {
     return (
         <div className="lg:w-2/5">
@@ -46,7 +51,11 @@ export default function ProductBasicInfo({
                 )}
                 <div className="space-y-4 mt-4">
                     <Button className="w-full">Go to BigBasket</Button>
-                    <Button variant="outline" className="w-full">Add to Archive</Button>
+                    {isLoggedIn && (
+                        <ConsumeProduct
+                            productId={product.id}
+                        />
+                    )}
                 </div>
             </div>
         </div>

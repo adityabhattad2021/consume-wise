@@ -29,7 +29,7 @@ export default async function ProductOverview({
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="pb-0">
                 {personalizedOverview ? (
                     <>
                         <CardTitle className="text-xl font-bold">Personalized Overview</CardTitle>
@@ -143,7 +143,7 @@ function DetailedContent({  personalizedOverview }: DetailedContentProps) {
 function HealthGoalImpacts({ impacts }: { impacts: PersonalizedOverview['healthGoalImpacts'] }) {
     return (
         <div>
-            <h3 className="text-lg font-semibold mb-2">Health Goal Impacts</h3>
+            <h3 className="text-lg font-semibold mb-2">Impact on your Health Goals</h3>
             <ul className="space-y-1">
                 {impacts.map((impact, index) => (
                     <li key={index} className="flex items-start">
