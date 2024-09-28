@@ -9,8 +9,9 @@ import { consumeProductSchema } from "@/api_schema/product/consume";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Input } from "../ui/input";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
 
 interface ConsumeProductProps {
     productId: number;
@@ -33,7 +34,27 @@ export default function ConsumeProduct({ productId }: ConsumeProductProps) {
     }
 
     async function onSubmit(values: z.infer<typeof consumeProductSchema>) {
-        console.log(values);
+        try{
+            const response = await axios.post('/api/product/consume',values)
+            if(response.status === 200){
+                toast({
+                    title:"Consumption logged",
+                description:"You have successfully logged your product consumption",
+                    variant:"default"
+                })  
+            }else{
+                throw new Error('Failed to log consumption')
+            }
+        }catch(error){
+            console.log('[PRODUCT_CONSUME_ERROR]: ',error)
+            toast({
+                title:"Error",
+                description:"An error occurred while logging your product consumption",
+                variant:"destructive"
+            })
+        }finally{
+            setOpen(false)
+        }
     }
 
     return (
@@ -89,7 +110,7 @@ export default function ConsumeProduct({ productId }: ConsumeProductProps) {
                                         <FormControl>
                                             <Slider
                                                 min={1}
-                                                max={7}
+                                                max={30}
                                                 step={1}
                                                 defaultValue={[Number(value)]}
                                                 onValueChange={(val)=>onValueChange(val,onChange)}
@@ -97,7 +118,7 @@ export default function ConsumeProduct({ productId }: ConsumeProductProps) {
                                         </FormControl>
                                         <div className="flex justify-between">
                                             <span>1</span>
-                                            <span>7+</span>
+                                            <span>30+</span>
                                         </div>
                                         <FormMessage />
                                     </FormItem>

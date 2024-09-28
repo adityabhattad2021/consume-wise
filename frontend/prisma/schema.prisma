@@ -33,7 +33,8 @@ model Product {
   functionalBenefits String[]
   suitableFor        HealthDetail[]
   notSuitableFor     HealthDetail[]
-  personalOverviews    PersonalizedOverview[]
+  personalOverviews  PersonalizedOverview[]
+  consumptions       Consumption[]
 }
 
 model Category {
@@ -147,14 +148,14 @@ model User {
   activityLevel      ActivityLevel?
   dietaryPreference  DietaryPreference?
   nutritionKnowledge Int?
-  healthGoals         HealthGoal[]
+  healthGoals        HealthGoal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Fields for health based recommendation
-  healthDetails      HealthDetail[]
-  dailyCalorieNeeds  Float?
+  healthDetails     HealthDetail[]
+  dailyCalorieNeeds Float?
 
   // Can be added later on.
   // macroNutrientRatio MacroNutrientRatio?
@@ -162,6 +163,7 @@ model User {
   // Ignoring allergies for now.
 
   personalOverviews PersonalizedOverview[]
+  consumptions      Consumption[]
 }
 
 // model MacroNutrientRatio {
@@ -183,23 +185,38 @@ model User {
 // }
 
 model PersonalizedOverview {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  productId    Int
-  overview String?
-  matchScore Int?
-  suitabilityReasons Json[]
+  id                       Int     @id @default(autoincrement())
+  userId                   String
+  productId                Int
+  overview                 String?
+  matchScore               Int?
+  suitabilityReasons       Json[]
   safeConsumptionGuideline Json
-  healthGoalImpacts Json[]
-  nutrientHighlights Json[]
-  
+  healthGoalImpacts        Json[]
+  nutrientHighlights       Json[]
+
   product Product @relation(fields: [productId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
   @@index([userId, productId])
 }
 
+model Consumption {
+  id        String @id @default(cuid())
+  productId Int
+  userId    String
+  quantity  Int  // In unit of product
+  duration  Int  // In days
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId, productId])
+}
 
 enum BiologicalSex {
   MALE
