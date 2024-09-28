@@ -171,6 +171,8 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
         const response = await model.generateContent([prompt]);
         const text = response.response.text();
         console.log("Gemini Response:", text);
+
+        // TODO: Save everything to the database
     } catch (e) {
         console.error("Error generating or parsing insights:", e);
         return;
