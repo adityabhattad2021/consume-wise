@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {  SearchIcon } from 'lucide-react'
@@ -47,11 +47,14 @@ export default function CommandK() {
         </Button>
       </DialogTrigger>
       <DialogContent className="p-0 overflow-hidden bg-white rounded-lg shadow-xl max-w-2xl">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200">
-          <DialogTitle className="text-lg font-semibold text-gray-900">
+        <DialogTitle className='sr-only'>
+          Seach filter
+        </DialogTitle>
+        <div className="px-6 py-4 ">
+          <h1 className="text-lg font-semibold text-gray-900">
             Let me filter the products for you!
-          </DialogTitle>
-        </DialogHeader>
+          </h1>
+        </div>
         <div className="p-6">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">

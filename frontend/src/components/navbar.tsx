@@ -1,49 +1,85 @@
-import React from "react";
+"use client"
+import React, { useState } from "react";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Leaf } from "lucide-react"
 import { cn } from "@/lib/utils";
-import dynamic from 'next/dynamic';
-import { auth } from "@/auth";
-import { Session } from "next-auth";
+import {
+    motion,
+    AnimatePresence,
+    useScroll,
+    useMotionValueEvent,
+} from "framer-motion";
+import CommandK from "@/components/command-k";
 
 
-const CommandK = dynamic(() => import('@/components/command-k'), {
-    ssr: false,
-    loading: () => <p>Loading...</p>
-});
 
 interface NavbarProps {
-    className?: string;
+    userLoggedIn: boolean;
 }
 
-export default async function Navbar({ className }: NavbarProps) {
+export default function Navbar({ userLoggedIn }: NavbarProps) {
+    const { scrollYProgress } = useScroll();
 
-    const session = await auth();
+    const [visible, setVisible] = useState(true);
+
+    useMotionValueEvent(scrollYProgress, "change", (current) => {
+        // Check if current is not undefined and is a number
+        if (typeof current === "number") {
+            const direction = current! - scrollYProgress.getPrevious()!;
+
+            if (scrollYProgress.get() < 0.05) {
+                setVisible(true);  // Changed to true to make navbar visible at the top
+            } else {
+                if (direction < 0) {
+                    setVisible(true);
+                } else {
+                    setVisible(false);
+                }
+            }
+        }
+    });
 
     return (
-        <nav className={cn("fixed top-6 inset-x-0 mx-auto w-[88%] z-50", className)}>
-            <div className="relative rounded-2xl border bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-lg flex items-center justify-between px-4 md:px-8 py-4 md:py-6">
-                <Link href="/" className="flex items-center gap-2">
-                    <Leaf className="h-6 w-6 text-primary" />
-                    <h1 className="text-xl md:text-2xl font-bold">ConsumeWise</h1>
-                </Link>
-                <div className="hidden md:flex items-center space-x-4 gap-4">
-                    {session?.user ? (
-                        <>
-                            <NavLink href="/profile">Profile</NavLink>
-                            <NavLink href="/products/add">Add a product</NavLink>
-                        </>
-                    ) : (
-                        <NavLink href="/auth/login">Login</NavLink>
-                    )}
-                    <CommandK />
-                </div>
-                <MobileMenu
-                    session={session}
-                />
-            </div>
-        </nav>
+        <AnimatePresence mode="wait">
+            <motion.nav
+                initial={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                animate={{
+                    y: visible ? 0 : -100,
+                    opacity: visible ? 1 : 0,
+                }}
+                transition={{
+                    duration: 0.2,
+                }}
+                className={cn("fixed top-6 inset-x-0 mx-auto w-[88%] z-50")}
+            >
+               
+                    <div className="relative rounded-2xl border bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-lg flex items-center justify-between px-4 md:px-8 py-4 md:py-6">
+                        <Link href="/" className="flex items-center gap-2">
+                            <Leaf className="h-6 w-6 text-primary" />
+                            <h1 className="text-xl md:text-2xl font-bold">ConsumeWise</h1>
+                        </Link>
+                        <div className="hidden md:flex items-center space-x-4 gap-4">
+                            {userLoggedIn ? (
+                                <>
+                                    <NavLink href="/profile">Profile</NavLink>
+                                    <NavLink href="/products/add">Add a product</NavLink>
+                                </>
+                            ) : (
+                                <NavLink href="/auth/login">Login</NavLink>
+                            )}
+                            <CommandK />
+                        </div>
+                        <MobileMenu
+                            userLoggedIn={userLoggedIn}
+                        />
+                    </div>
+            </motion.nav>
+        </AnimatePresence>
+
     );
 }
 
@@ -59,9 +95,9 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 }
 
 function MobileMenu({
-    session
+    userLoggedIn
 }: {
-    session: Session | null;
+    userLoggedIn: boolean;
 }) {
     return (
         <div className="md:hidden">
@@ -75,12 +111,15 @@ function MobileMenu({
                         </svg>
                     </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] bg-secondary/95 backdrop-blur-lg text-secondary-foreground">
+                <SheetContent side="left" className="w-[300px] bg-secondary/95 backdrop-blur-lg text-secondary-foreground"  >
+                    <SheetHeader className="sr-only">
+                        <SheetTitle >Consumewise</SheetTitle>
+                    </SheetHeader>
                     <div className="flex flex-col space-y-6 mt-6">
                         <h3 className="text-xl font-semibold border-b border-secondary-foreground/20 pb-2">ConsumeWise</h3>
                         <div className="text-xl font-semibold pt-2">
 
-                            {session?.user ? (
+                            {userLoggedIn ? (
                                 <>
                                     <MobileNavLink href="/profile">Profile</MobileNavLink>
                                     <MobileNavLink href="/products/add">Add a product</MobileNavLink>

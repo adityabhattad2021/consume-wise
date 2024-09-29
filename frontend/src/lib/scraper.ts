@@ -360,7 +360,7 @@ export async function scrapeAndStoreProduct(url: string): Promise<void> {
 			const existingProduct = await prisma.product.findFirst({
 				where: {
 					vendorProductUrl: {
-						contains: url
+						contains: new URL(url).origin+new URL(url).pathname
 					}
 				},
 				select: {
@@ -404,7 +404,7 @@ export async function scrapeAndStoreProduct(url: string): Promise<void> {
 	}
 }
 
-// const productUrl = 'https://www.bigbasket.com/pd/40015688/kelloggs-corn-flakes-875-g';
-// main(productUrl);
+// const productUrl = 'https://www.bigbasket.com/pd/40189244/kelloggs-muesli-breakfast-cereal-with-multigrain-21-fruit-nut-seeds-750-g-0/';
+// scrapeAndStoreProduct(productUrl);
 
 
