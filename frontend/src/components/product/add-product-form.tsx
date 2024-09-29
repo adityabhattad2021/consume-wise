@@ -30,6 +30,7 @@ export default function AddProductForm() {
                 description: response.data.message,
                 variant: "default"
             })
+            // eslint-disable-next-line
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -50,7 +51,7 @@ export default function AddProductForm() {
                         </div>
                         <div className="ml-3">
                             <p className="text-sm text-yellow-700">
-                                This is an initial prototype and only works with bigbasket.com. We're working on automatically adding new products regularly.
+                                This is an initial prototype and only works with bigbasket.com. We&apos;re working on automatically adding new products regularly.
                             </p>
                             <p className="text-sm text-yellow-700 mt-2">
                                 Due to service limitations, requests are rate-limited to 1 per 3 hours. Please be patient.

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { type Session } from "next-auth";
 import { scrapeAndStoreProduct } from "@/lib/scraper";
 import { addProductSchema } from "@/api_schema/product/add";
+import { ratelimit } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
@@ -12,9 +13,16 @@ interface NextAuthRequest extends NextRequest {
 
 export const POST = auth(async function POST(req: NextAuthRequest) {
     try {
-        // Add rate limiting for every 1 
-        if (!req.auth) {
+        
+        if (!req.auth?.user?.id) {
             return NextResponse.json({ message: "Not authenticated" }, { status: 401 })
+        }
+
+        const {success} = await ratelimit.limit(req.auth.user.id);
+        console.log("success", success, req.auth.user.id);
+        if(!success){
+            console.log("Rate limit exceeded, please try again later.");
+            return NextResponse.json({ message: "Rate limit exceeded, please try again later." }, { status: 429 });
         }
         
         const data = await req.json();
@@ -28,6 +36,7 @@ export const POST = auth(async function POST(req: NextAuthRequest) {
         await scrapeAndStoreProduct(url);
         return NextResponse.json({ message: "Product added successfully" }, { status: 200 });
     }
+    // eslint-disable-next-line
     catch(err:any){
         return NextResponse.json({ message: err.message }, { status: 500 });
     }
