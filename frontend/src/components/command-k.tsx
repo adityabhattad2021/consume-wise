@@ -74,7 +74,7 @@ export default function CommandK() {
             <Button
               onClick={handleSearch}
               disabled={query.trim() === ''}
-              className="p-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
+              className="p-2 bg-white text-black rounded-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
             >
               <Image
                 width={24}

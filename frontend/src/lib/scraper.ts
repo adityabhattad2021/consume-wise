@@ -56,8 +56,8 @@ interface ProductDetails {
 	functionalBenefits: string[];
 	suitableFor: HealthDetail[]
 	notSuitableFor: HealthDetail[];
-	naturalIngredientCount:number;
-	processedIngredientCount:number;
+	naturalIngredientCount: number;
+	processedIngredientCount: number;
 }
 
 async function scrapeProductImages(url: string): Promise<string[]> {
@@ -230,7 +230,7 @@ async function storeImagesInVercelBlob(imageUrls: string[]): Promise<string[]> {
 	return storedUrls;
 }
 
-async function storeProductInDatabase(productDetails: ProductDetails, imageUrls: string[],url:string,venderName:string) {
+async function storeProductInDatabase(productDetails: ProductDetails, imageUrls: string[], url: string, venderName: string) {
 
 	const categoryPromises = productDetails.categories.map(async (categoryName) => {
 		return prisma.category.upsert({
@@ -254,8 +254,8 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 			nutritionalFacts: {
 				create: productDetails.nutritionalFacts
 			},
-			healthScore:calculateProductHealthScore(productDetails.nutritionalFacts,productDetails.naturalIngredientCount,productDetails.processedIngredientCount),
-			nutritionDensity:calculateNutrientDensity(productDetails.nutritionalFacts),
+			healthScore: calculateProductHealthScore(productDetails.nutritionalFacts, productDetails.naturalIngredientCount, productDetails.processedIngredientCount),
+			nutritionDensity: calculateNutrientDensity(productDetails.nutritionalFacts),
 			ingredients: {
 				create: productDetails.ingredients.map((ingredient, index) => ({
 					ingredient: {
@@ -304,9 +304,9 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 					category: { connect: { id: category.id } },
 				})),
 			},
-			functionalBenefits:productDetails.functionalBenefits,
-			notSuitableFor:productDetails.notSuitableFor,
-			suitableFor:productDetails.suitableFor
+			functionalBenefits: productDetails.functionalBenefits,
+			notSuitableFor: productDetails.notSuitableFor,
+			suitableFor: productDetails.suitableFor
 		},
 		include: {
 			nutritionalFacts: true,
@@ -334,29 +334,38 @@ async function getVenderName(url: string): Promise<string> {
 	return venderName;
 }
 
-async function main(url: string) {
+export async function scrapeAndStoreProduct(url: string): Promise<string> {
 	try {
 
-		const venderName = await getVenderName(url);
-		const imageUrls = await scrapeProductImages(url);
-		console.log('Scraped image URLs:', imageUrls);
+		if (url.includes('https://www.bigbasket.com')) {
+			const venderName = await getVenderName(url);
+			const imageUrls = await scrapeProductImages(url);
+			console.log('Scraped image URLs:', imageUrls);
+			if(imageUrls.length === 1){
+				return "Insufficient data to analyze the product";
+			}
 
-		const productDetails = await analyzeProductWithGemini(imageUrls);
-		console.log('Product details from Gemini:', productDetails);
+			const productDetails = await analyzeProductWithGemini(imageUrls);
+			console.log('Product details from Gemini:', productDetails);
 
-		const storedImageUrls = await storeImagesInVercelBlob(imageUrls);
-		console.log('Stored image URLs:', storedImageUrls);
+			const storedImageUrls = await storeImagesInVercelBlob(imageUrls);
+			console.log('Stored image URLs:', storedImageUrls);
 
-		await storeProductInDatabase(productDetails, storedImageUrls,url,venderName);
-		console.log('Product information stored in database');
+			await storeProductInDatabase(productDetails, storedImageUrls, url, venderName);
+			console.log('Product information stored in database');
+		}else{
+			return "Invalid URL";
+		}
+		await prisma.$disconnect();
+		return "Successfully added the product";
 	} catch (error) {
 		console.error('Error in main function:', error);
-	} finally {
 		await prisma.$disconnect();
-	}
+		return "Failed to add the product";
+	} 
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/40015688/kelloggs-corn-flakes-875-g';
-main(productUrl);
+// const productUrl = 'https://www.bigbasket.com/pd/40015688/kelloggs-corn-flakes-875-g';
+// main(productUrl);
 
 
