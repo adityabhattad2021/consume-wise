@@ -334,15 +334,55 @@ async function getVenderName(url: string): Promise<string> {
 	return venderName;
 }
 
-export async function scrapeAndStoreProduct(url: string): Promise<string> {
+async function isEdible(imageUrls: string[]): Promise<boolean> {
+	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+
+	const prompt = `
+		Based on the image of the product, determine if the product is edible or not.
+		response format:
+		{
+			"edible": true | false
+		}
+	`;
+
+	const result = await model.generateContent([prompt, ...imageUrls]);
+	const response = result.response;
+	const text = response.text();
+
+	return JSON.parse(text).edible;
+}
+
+export async function scrapeAndStoreProduct(url: string): Promise<void> {
 	try {
 
 		if (url.includes('https://www.bigbasket.com')) {
+
+			const existingProduct = await prisma.product.findFirst({
+				where: {
+					vendorProductUrl: {
+						contains: url
+					}
+				},
+				select: {
+					vendorProductUrl: true
+				}
+			})
+
+			if (existingProduct) {
+				throw new Error("Product already exists");
+			}
+
 			const venderName = await getVenderName(url);
 			const imageUrls = await scrapeProductImages(url);
 			console.log('Scraped image URLs:', imageUrls);
-			if(imageUrls.length === 1){
-				return "Insufficient data to analyze the product";
+			
+			if (imageUrls.length === 1) {
+				throw new Error("Insufficient data to analyze the product");
+			}
+
+			const edible = await isEdible(imageUrls);
+			if (!edible) {
+				throw new Error("Product is not suitable for consumption, hence cannot be added.");
 			}
 
 			const productDetails = await analyzeProductWithGemini(imageUrls);
@@ -353,16 +393,15 @@ export async function scrapeAndStoreProduct(url: string): Promise<string> {
 
 			await storeProductInDatabase(productDetails, storedImageUrls, url, venderName);
 			console.log('Product information stored in database');
-		}else{
-			return "Invalid URL";
+		} else {
+			throw new Error("Invalid URL");
 		}
 		await prisma.$disconnect();
-		return "Successfully added the product";
 	} catch (error) {
 		console.error('Error in main function:', error);
 		await prisma.$disconnect();
-		return "Failed to add the product";
-	} 
+		throw error;
+	}
 }
 
 // const productUrl = 'https://www.bigbasket.com/pd/40015688/kelloggs-corn-flakes-875-g';

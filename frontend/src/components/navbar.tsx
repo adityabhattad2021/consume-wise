@@ -32,7 +32,7 @@ export default async function Navbar({ className }: NavbarProps) {
                     {session?.user ? (
                         <>
                             <NavLink href="/profile">Profile</NavLink>
-                            <NavLink href="#">Add a product</NavLink>
+                            <NavLink href="/products/add">Add a product</NavLink>
                         </>
                     ) : (
                         <NavLink href="/auth/login">Login</NavLink>
@@ -83,7 +83,7 @@ function MobileMenu({
                             {session?.user ? (
                                 <>
                                     <MobileNavLink href="/profile">Profile</MobileNavLink>
-                                    <MobileNavLink href="#">Add a product</MobileNavLink>
+                                    <MobileNavLink href="/products/add">Add a product</MobileNavLink>
                                 </>
                             ) : (
                                 <MobileNavLink href="/auth/login">Login</MobileNavLink>
