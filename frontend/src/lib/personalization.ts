@@ -95,7 +95,7 @@ function generateCombinedPrompt(user: Partial<User>, product: Partial<ProductWit
     Given the following user profile and product details, generate a personalized product overview, match score, suitability reasons, safe consumption guideline, health goal impacts, and nutrient highlights.  Return the results as a JSON object with the following structure:
     {
         "overview": "string",
-        "matchScore": number,
+        "matchScore": number, (0-100)
         "suitabilityReasons": [{ "type": "good/bad", "reason": "string" }],
         "safeConsumptionGuideline": { "frequency": "daily/weekly/monthly", "amount": number, "unit": "string" },
         "healthGoalImpacts": [{ "goal": "string", "impact": "string" }],

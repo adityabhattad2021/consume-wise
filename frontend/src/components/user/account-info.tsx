@@ -5,28 +5,46 @@ import { Activity, Goal } from 'lucide-react';
 import { SignOutButton } from '@/components/user/signout-button';
 import { CustomSection as Section } from '@/components/user/section';
 import UpdateProfileDialog from "./update-profile-dialog";
+import { unstable_cache } from 'next/cache';
+import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { User } from "@prisma/client";
 
+export const dynamic = 'force-dynamic'
 
 interface AccountInfoProps {
-    userPromise: Promise<User | null>
+    userId: string
 }
 
+const getUser = unstable_cache(
+    async (userId: string) => {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+        return user
+    },
+    ['user-fn'],
+    {
+        tags:['user']
+    }
+)
+
 export async function AccountInfo({
-    userPromise
+    userId
 }: AccountInfoProps) {
 
-    const user = await userPromise;
+
+    const user = await getUser(userId);
     if (!user) {
         redirect("/");
     }
 
     return (
-        <div className="mx-auto px-4 py-8">
+        <div className="mx-auto py-8">
             <Card className="w-full mx-auto">
                 <CardHeader className="flex flex-row justify-between items-center gap-3">
-                    <CardTitle className="text-2xl font-bold text-wrap">Account Information</CardTitle>
+                    <CardTitle className="text-lg md:text-2xl font-bold text-wrap">Account Information</CardTitle>
                     <div className="space-x-2">
                         <SignOutButton />
                     </div>

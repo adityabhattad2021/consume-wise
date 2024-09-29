@@ -43,7 +43,7 @@ export function CustomSection({ icon, title, items, sectionKey }: SectionProps) 
     const { toast } = useToast();
 
     async function onSubmit(values: z.infer<typeof sectionFormSchema>) {
-        const updatedField = Array.from(new Set([...items, values.value]))
+        const updatedField = Array.from(new Set([...items, values.value]))  
         await submitFn(values.key, updatedField)
     }
 
@@ -64,6 +64,7 @@ export function CustomSection({ icon, title, items, sectionKey }: SectionProps) 
                     variant: "default"
                 })
             }
+            window.location.reload()
         } catch (err) {
             console.log(`[ERROR_WHILE_UPDATING (${sectionKey})]: `, err);
             toast({

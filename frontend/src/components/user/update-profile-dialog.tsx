@@ -43,7 +43,7 @@ export default function UpdateProfileDialog({ user }: UpdateProfileDialogProps) 
         resolver: zodResolver(updateUserSchema),
         defaultValues: {
             biologicalSex: user.biologicalSex || undefined,
-            age: user.age || undefined,
+            age: user.age?.toString() || undefined,
             weight: user.weight?.toString() || undefined,
             height: user.height?.toString() || undefined,
             healthDetails: user.healthDetails,

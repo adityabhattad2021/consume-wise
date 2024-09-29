@@ -31,6 +31,8 @@ model Product {
   healthScore        Float
   nutritionDensity   Float
   functionalBenefits String[]
+  venderName         String
+  vendorProductUrl   String
   suitableFor        HealthDetail[]
   notSuitableFor     HealthDetail[]
   personalOverviews  PersonalizedOverview[]
@@ -215,10 +217,11 @@ model Consumption {
 
   createdAt DateTime @default(now())
 
-  @@unique([userId, productId])
-  @@index([userId, productId])
+  @@unique([userId, productId ,createdAt])
+  @@index([userId, productId ,createdAt])
 }
 
+// Change this to daily later on.
 model WeeklyConsumptionAnalysis {
   id                    String   @id @default(cuid())
   userId                String
@@ -231,7 +234,7 @@ model WeeklyConsumptionAnalysis {
 
   user User @relation(fields: [userId], references: [id])
 
-  @@index([userId])
+  @@index([userId,createdAt])
 }
 
 enum BiologicalSex {

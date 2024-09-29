@@ -78,6 +78,8 @@ async function main(): Promise<void> {
             data: {
                 name: faker.commerce.productName(),
                 brand: faker.company.name(),
+                venderName: faker.company.name(),
+                vendorProductUrl: faker.internet.url(),
                 imageUrl: [faker.image.url(), faker.image.url()],
                 servingSize: faker.number.float({ min: 1, max: 500, fractionDigits: 1 }),
                 servingUnit: faker.helpers.arrayElement(['g', 'ml', 'oz', 'cup']),

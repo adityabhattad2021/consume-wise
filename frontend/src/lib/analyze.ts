@@ -1,7 +1,15 @@
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-interface NutrientData {
+interface ConsumptionReport {
+    totalConsumedCalories: number;
+    totalConsumedProducts: number;
+    reportDate: Date;
+    majorCategories: string[];
+    totalNutrients: AnalysisNutrientData;
+}
+
+export interface AnalysisNutrientData {
     calories: number;
     totalFat: number;
     saturatedFat: number;
@@ -19,12 +27,33 @@ interface NutrientData {
     iron: number;
 }
 
-interface ConsumptionReport {
+export const recommendationType = {
+    FOOD_SWAP: "Food Swap",
+    PORTION_ADJUSTMENT: "Portion Adjustment",
+    MEAL_PLAN_RECOMMENDATION: "Meal Plan Recommendation",
+    NUTRIENT_INTAKE_ADJUSTMENT: "Nutrient Intake Adjustment"
+}
+
+export interface AnalysisRecommendation {
+    type: typeof recommendationType[keyof typeof recommendationType];
+    description: string;
+    reason: string;
+}
+
+export interface AIAnalysis {
+    analysisSummary: string;
+    recommendations: AnalysisRecommendation[];
+}
+
+
+export interface WeeklyConsumptionAnalysis {
+    id: string;
+    userId: string;
     totalConsumedCalories: number;
     totalConsumedProducts: number;
-    reportDate: Date;
     majorCategories: string[];
-    totalNutrients: NutrientData;
+    totalNutrients: AnalysisNutrientData;
+    aiAnalysis: string;
 }
 
 export async function analyzeUserConsumption(userId: string): Promise<undefined> {
@@ -36,6 +65,7 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
         })
 
         if (!user) {
+            console.error("User not found");
             return;
         }
 
@@ -43,8 +73,8 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
             where: {
                 userId: userId,
                 createdAt: {
-                    gte: new Date(new Date().setDate(new Date().getDate() - 7)),
-                    lte: new Date()
+                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                    lt: new Date(new Date().setHours(23, 59, 59, 999))
                 }
             },
             include: {
@@ -84,6 +114,7 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
         })
 
         if (!consumptions || consumptions.length === 0) {
+            console.error("No consumptions found");
             return;
         }
 
@@ -111,7 +142,6 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
             }
         }
 
-
         for (const consumption of consumptions) {
 
             if (!consumption.product || !consumption.product.nutritionalFacts?.calories) {
@@ -122,7 +152,7 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
 
             Object.entries(consumption.product.nutritionalFacts).forEach(([key, value]) => {
                 if (value) {
-                    report.totalNutrients[key as keyof NutrientData] += value * consumption.quantity
+                    report.totalNutrients[key as keyof AnalysisNutrientData] += value * consumption.quantity
                 }
             })
 
@@ -171,16 +201,27 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
         const response = await model.generateContent([prompt]);
         const text = response.response.text();
         console.log("Gemini Response:", text);
+        const aiAnalysis: AIAnalysis = JSON.parse(text);
 
-        // TODO: Save everything to the database
+        await prisma.weeklyConsumptionAnalysis.create({
+            data: {
+                userId: userId,
+                totalConsumedCalories: report.totalConsumedCalories,
+                totalConsumedProducts: report.totalConsumedProducts,
+                majorCategories: report.majorCategories,
+                totalNutrients: JSON.stringify(report.totalNutrients),
+                aiAnalysis: JSON.stringify(aiAnalysis)
+            }
+        })
+
     } catch (e) {
-        console.error("Error generating or parsing insights:", e);
+        console.error("Error generating or parsing analysis:", e);
         return;
     }
 }
 
 
-analyzeUserConsumption("cm1kli25z0000bl9dxz46tcyc").then(() => {
+analyzeUserConsumption("cm1m5n22v000028fd1ej56bw5").then(() => {
     console.log("done");
 }).catch((error) => {
     console.error(error);

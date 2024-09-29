@@ -2,21 +2,22 @@ import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountInfo } from "@/components/user/account-info";
-import prisma from "@/lib/prisma";
+import ConsumptionAnalysis from "@/components/user/consumption-analysis";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+    searchParams
+}:{
+    searchParams: {
+        date: string;
+    }
+}) {
 
     const session = await auth();
-    if(!session?.user){
+    if(!session?.user?.id){
         redirect("/")
     }
-    const userPromise = prisma.user.findUnique({
-        where: {
-            id: session.user.id
-        }
-    });
 
     return (
         <div className="mx-auto px-10 md:px-24 py-8 pt-36">
@@ -29,24 +30,21 @@ export default async function ProfilePage() {
                 </p>
             </div>
             <Tabs className="space-y-6 mt-6" defaultValue={"accountInfo"}>
-                <TabsList className="w-full grid grid-cols-2 gap-2 h-10" >
-                    <TabsTrigger value="accountInfo" className="h-full">Account Information</TabsTrigger>
-                    <TabsTrigger value="consumptionAnalysis" className="h-full">
+                <TabsList className="w-full grid grid-cols-2 gap-2 min-h-20 sm:min-h-10 p-2" >
+                    <TabsTrigger value="accountInfo" className="h-full text-wrap">Account Information</TabsTrigger>
+                    <TabsTrigger value="consumptionAnalysis" className="h-full text-wrap">
                         Consumption Analysis
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="accountInfo">
                     <Suspense fallback={<AccountInfoSkeleton/>}>
-                        <AccountInfo userPromise={userPromise} />
+                        <AccountInfo userId={session.user.id} />
                     </Suspense>
                 </TabsContent>
                 <TabsContent value="consumptionAnalysis">
-                    <div className="h-full w-full flex flex-col justify-center items-center">
-                        <h1 className="text-4xl font-bold">Consumption Analysis</h1>
-                        <p className="text-lg text-muted-foreground">
-                            WIP⚒️
-                        </p>
-                    </div>
+                    <Suspense fallback={<ConsumptionAnalysisSkeleton/>}>
+                        <ConsumptionAnalysis date={searchParams.date} />
+                    </Suspense>
                 </TabsContent>
             </Tabs>
         </div>
@@ -54,6 +52,18 @@ export default async function ProfilePage() {
 }
 
 
+function ConsumptionAnalysisSkeleton() {
+    return (
+        <div className="mx-auto px-4 py-8">
+            <Card className="w-full mx-auto">
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <CardTitle className="text-2xl font-bold">Consumption Analysis</CardTitle>
+                    <div className="rounded-md w-24 h-8 animate-pulse" />
+                </CardHeader>
+            </Card>
+        </div>
+    );
+}
 function AccountInfoSkeleton() {
     return (
         <div className="mx-auto px-4 py-8">

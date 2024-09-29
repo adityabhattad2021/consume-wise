@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Suspense } from 'react'
 import { Card } from '@/components/ui/card';
 import ConsumeProduct from '@/components/product/consume-product';
+import Link from 'next/link';
+import { capitalizeWords } from '@/lib/capitalize_word';
 
 
 
@@ -12,6 +14,8 @@ interface ProductBasicInfoProps {
         id: number;
         imageUrl: string[]
         name: string;
+        vendorProductUrl: string;
+        venderName: string;
     }
     isLoggedIn: boolean;
 }
@@ -50,7 +54,11 @@ export default function ProductBasicInfo({
                     </Card>
                 )}
                 <div className="space-y-4 mt-4">
-                    <Button className="w-full">Go to BigBasket</Button>
+                    <Button className="w-full">
+                        <Link href={product.vendorProductUrl} target="_blank">
+                            Go to {capitalizeWords(product.venderName)}
+                        </Link>
+                    </Button>
                     {isLoggedIn && (
                         <ConsumeProduct
                             productId={product.id}

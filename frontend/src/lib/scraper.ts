@@ -230,7 +230,7 @@ async function storeImagesInVercelBlob(imageUrls: string[]): Promise<string[]> {
 	return storedUrls;
 }
 
-async function storeProductInDatabase(productDetails: ProductDetails, imageUrls: string[]) {
+async function storeProductInDatabase(productDetails: ProductDetails, imageUrls: string[],url:string,venderName:string) {
 
 	const categoryPromises = productDetails.categories.map(async (categoryName) => {
 		return prisma.category.upsert({
@@ -245,6 +245,8 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 		data: {
 			name: productDetails.name,
 			brand: productDetails.brand,
+			venderName: venderName,
+			vendorProductUrl: url,
 			summary: productDetails.summary,
 			imageUrl: imageUrls,
 			servingSize: productDetails.servingSize,
@@ -326,8 +328,16 @@ async function storeProductInDatabase(productDetails: ProductDetails, imageUrls:
 	console.log('Product stored in database:', JSON.stringify(product, null, 2));
 }
 
+
+async function getVenderName(url: string): Promise<string> {
+	const venderName = url.split('www.')[1].split('.')[0];
+	return venderName;
+}
+
 async function main(url: string) {
 	try {
+
+		const venderName = await getVenderName(url);
 		const imageUrls = await scrapeProductImages(url);
 		console.log('Scraped image URLs:', imageUrls);
 
@@ -337,7 +347,7 @@ async function main(url: string) {
 		const storedImageUrls = await storeImagesInVercelBlob(imageUrls);
 		console.log('Stored image URLs:', storedImageUrls);
 
-		await storeProductInDatabase(productDetails, storedImageUrls);
+		await storeProductInDatabase(productDetails, storedImageUrls,url,venderName);
 		console.log('Product information stored in database');
 	} catch (error) {
 		console.error('Error in main function:', error);
@@ -346,7 +356,7 @@ async function main(url: string) {
 	}
 }
 
-const productUrl = 'https://www.bigbasket.com/pd/1204027/haldirams-namkeen-tasty-nuts-3x150-g/';
+const productUrl = 'https://www.bigbasket.com/pd/40015688/kelloggs-corn-flakes-875-g';
 main(productUrl);
 
 

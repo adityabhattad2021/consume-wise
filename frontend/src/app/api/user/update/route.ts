@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { type Session } from "next-auth";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { updateUserSchema } from "@/api_schema/user/update";
 
 
@@ -45,17 +45,18 @@ export const POST = auth(async function POST(req:NextAuthRequest){
         fieldsToUpdate.forEach(field => {
             if (data[field as keyof typeof data] !== undefined) {
                 // @ts-expect-error Don't know how to properly type this
-                transformedData[field] = field === 'weight' || field === 'height' ? parseFloat(data[field as keyof typeof data] as string) : field === 'nutritionKnowledge' ? parseInt(data[field as keyof typeof data] as string) : data[field as keyof typeof data];
+                transformedData[field] = field === 'weight' || field === 'height' ? parseFloat(data[field as keyof typeof data] as string) : field === 'nutritionKnowledge' || field === 'age' ? parseInt(data[field as keyof typeof data] as string) : data[field as keyof typeof data];
             }
         });
 
+        console.log(transformedData);
         await prisma.user.update({
-            where:{
+            where: {
                 id:req.auth.user.id
             },
             data:transformedData
         })
-        revalidatePath('/profile');
+        revalidateTag('user')
         return NextResponse.json({message:"User updated successfully"},{status:200})
     }catch(err){
         console.log(`[ERROR_WHILE_UPDATING]: `,err);

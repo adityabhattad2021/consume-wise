@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { type Session } from "next-auth";
-import { revalidatePath } from "next/cache";
 import { consumeProductSchema } from "@/api_schema/product/consume";
 
 

@@ -4,7 +4,7 @@ import { BiologicalSex, HealthDetail, ActivityLevel, DietaryPreference, HealthGo
 
 export const updateUserSchema = z.object({
     biologicalSex: BiologicalSex.optional(),
-    age: z.number().optional(),
+    age: z.string().optional(),
     weight: z.string().optional(),
     height: z.string().optional(),
     healthDetails: z.array(HealthDetail).optional(),

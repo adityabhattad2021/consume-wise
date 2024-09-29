@@ -40,6 +40,8 @@ export async function getProductBasicInfo(id: number) {
       brand: true,
       imageUrl: true,
       summary: true,
+      vendorProductUrl: true,
+      venderName: true,
       servingSize: true,
       servingUnit: true,
     },
