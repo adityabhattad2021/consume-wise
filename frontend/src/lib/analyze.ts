@@ -142,6 +142,22 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
             }
         }
 
+        // Check if the user has already been analyzed today
+        const lastAnalysis = await prisma.weeklyConsumptionAnalysis.findFirst({
+            where: {
+                userId: userId,
+                createdAt: {
+                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                    lt: new Date(new Date().setHours(23, 59, 59, 999))
+                }
+            }
+        })
+
+        if (lastAnalysis) {
+            console.log("User already analyzed today");
+            return;
+        }
+
         for (const consumption of consumptions) {
 
             if (!consumption.product || !consumption.product.nutritionalFacts?.calories) {
@@ -221,8 +237,8 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
 }
 
 
-analyzeUserConsumption("cm1m5n22v000028fd1ej56bw5").then(() => {
-    console.log("done");
-}).catch((error) => {
-    console.error(error);
-})
+// analyzeUserConsumption("cm1m5n22v000028fd1ej56bw5").then(() => {
+//     console.log("done");
+// }).catch((error) => {
+//     console.error(error);
+// })

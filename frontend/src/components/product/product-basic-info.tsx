@@ -54,7 +54,7 @@ export default function ProductBasicInfo({
                     </Card>
                 )}
                 <div className="space-y-4 mt-4">
-                    <Button className="w-full">
+                    <Button className="w-full" asChild>
                         <Link href={product.vendorProductUrl} target="_blank">
                             Go to {capitalizeWords(product.venderName)}
                         </Link>
