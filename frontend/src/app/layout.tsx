@@ -9,7 +9,7 @@ const font = Poppins({
 
 export const metadata: Metadata = {
   title: "ConsumeWise",
-  description: "ConsumeWise Application",
+  description: "ConsumeWise is an ai powered application that helps you track and improve your food consumption habits",
 };
 
 export default function RootLayout({
