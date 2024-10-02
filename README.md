@@ -1,8 +1,6 @@
 # ConsumeWise v0.1
 
-
-![Decode your choices, elevate your health](https://github.com/user-attachments/assets/d1cfaa67-3ea7-4c82-aba8-8bb1d89801c6)
-
+![Decode your choices, elevate your health (2)](https://github.com/user-attachments/assets/ccb20e4f-8eac-4ed0-b937-5739b45b59d7)
 
 # Overview
 
