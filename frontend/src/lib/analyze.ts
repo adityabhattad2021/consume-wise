@@ -168,11 +168,11 @@ export async function analyzeUserConsumption(userId: string): Promise<undefined>
 
             Object.entries(consumption.product.nutritionalFacts).forEach(([key, value]) => {
                 if (value) {
-                    report.totalNutrients[key as keyof AnalysisNutrientData] += value * consumption.quantity
+                    report.totalNutrients[key as keyof AnalysisNutrientData] += value * (consumption.quantity/consumption.duration)
                 }
             })
 
-            report.totalConsumedCalories += consumption.product.nutritionalFacts.calories * consumption.quantity
+            report.totalConsumedCalories += consumption.product.nutritionalFacts.calories * (consumption.quantity/consumption.duration)
             report.totalConsumedProducts += 1
 
         }
