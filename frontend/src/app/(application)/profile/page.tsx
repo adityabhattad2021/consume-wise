@@ -20,7 +20,7 @@ export default async function ProfilePage({
     }
 
     return (
-        <div className="mx-auto px-10 md:px-24 py-8 pt-36">
+        <div className="mx-auto px-10 md:px-24 py-8">
             <div className="w-full flex flex-col justify-start gap-3">
                 <h1 className="text-4xl font-bold">
                     Your Profile

@@ -16,7 +16,7 @@ export default async function ApplicationLayout({
   return (
     <>
       <Navbar userLoggedIn={session?.user ? true : false} />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pt-24 sm:pt-32">
         {children}
       </div>
       {modal}

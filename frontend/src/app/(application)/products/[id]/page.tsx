@@ -37,7 +37,7 @@ export default async function ProductDetailsPage({
   }
 
   return (
-    <div className="container mx-auto px-10 md:px-24 py-8 pt-32">
+    <div className="container mx-auto px-10 md:px-24 py-8">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-20">
         <Suspense fallback={<ProductBasicInfoSkeleton />}>
           <ProductBasicInfo product={basicInfo} isLoggedIn={!!session?.user.id} />

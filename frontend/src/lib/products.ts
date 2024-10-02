@@ -2,20 +2,42 @@
 import prisma from "@/lib/prisma"
 
 
-export async function getProducts(categories: string[]) {
+export async function getProducts(categories: string[], query: string) {
   const categoryIds = categories.map(id => Number(id));
+  console.log(query);
+
   const products = await prisma.product.findMany({
-    where: categories.length > 0 ? {
-      categories: {
-        some: {
-          category: {
-            id: {
-              in: categoryIds
+    where: {
+      AND: [
+        categories.length > 0 ? {
+          categories: {
+            some: {
+              category: {
+                id: {
+                  in: categoryIds
+                }
+              }
             }
           }
-        }
-      }
-    } : undefined,
+        } : {},
+        query ? {
+          OR: [
+            {
+              name: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              brand: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          ]
+        } : {}
+      ]
+    },
     select: {
       name: true,
       imageUrl: true,
@@ -53,14 +75,14 @@ export async function getProductOverview(id: number) {
     where: { id },
     select: {
       summary: true,
-      healthScore:true,
+      healthScore: true,
       nutritionalFacts: {
         select: {
           protein: true,
           totalFat: true,
           totalCarbohydrate: true,
-          saturatedFat:true,
-          addedSugars:true,
+          saturatedFat: true,
+          addedSugars: true,
           dietaryFiber: true,
         },
       },

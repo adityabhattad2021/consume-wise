@@ -15,15 +15,17 @@ export default async function AllProductsPage({
 }: {
   searchParams?: {
     categories?: string;
+    query?: string;
   }
 }) {
-  
+
+  const query = searchParams?.query || '';
   const categories = searchParams?.categories?.split(',') || [];
   const allCategoriesPromise = getCategories();
-  const allProductsPromise = getProducts(categories);
+  const allProductsPromise = getProducts(categories, query);
 
   return (
-    <main className="container mx-auto px-4 pt-32 pb-16 w-[90%]">
+    <main className="container mx-auto px-4 pb-16 w-[90%]">
       <Suspense fallback={<Loader className="h-16" />}>
         <FilterBarWrapper categoriesPromise={allCategoriesPromise} />
       </Suspense>

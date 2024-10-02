@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 interface SelectDateProps {
     availableDates: Date[];
@@ -14,7 +14,7 @@ export default function SelectDate({ availableDates }: SelectDateProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState(availableDates.length > 0 ? availableDates[availableDates.length - 1].toISOString() : undefined);
-    useEffect(() => {
+    useLayoutEffect(() => {
         function handleDateChange(date: string) {
             const params = new URLSearchParams(searchParams);
             if (date) {
@@ -29,9 +29,6 @@ export default function SelectDate({ availableDates }: SelectDateProps) {
             handleDateChange(selectedDate);
         }
     }, [selectedDate, router, pathname, searchParams]);
-
-
-
 
 
     return (
