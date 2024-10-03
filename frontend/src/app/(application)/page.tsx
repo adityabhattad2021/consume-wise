@@ -19,6 +19,7 @@ export default async function AllProductsPage({
   }
 }) {
 
+ 
   const query = searchParams?.query || '';
   const categories = searchParams?.categories?.split(',') || [];
   const allCategoriesPromise = getCategories();
