@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import { auth } from "@/auth";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster"
+import { redirect } from "next/navigation";
 
 
 export default async function ApplicationLayout({
@@ -12,7 +13,12 @@ export default async function ApplicationLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }) {
+  
   const session = await auth();
+  if(session?.user.id && !session.user.isOnboarded){
+    redirect('/user/new');
+  }
+
   return (
     <>
       <Navbar userLoggedIn={session?.user ? true : false} />
