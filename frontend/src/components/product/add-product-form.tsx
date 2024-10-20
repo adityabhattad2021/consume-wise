@@ -41,7 +41,7 @@ export default function AddProductForm() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
+        <div className="absolute top-0 left-0 right-0 min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
             <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl p-8">
                 <h1 className="text-3xl font-bold text-green-600 mb-6">Add a BigBasket Product</h1>
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
