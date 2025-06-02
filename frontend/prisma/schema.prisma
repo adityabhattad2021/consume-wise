@@ -21,10 +21,10 @@ model Product {
   servingUnit      String?
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @default(now()) @updatedAt
-  nutritionalFacts NutritionalFact?
+  nutritionalFacts NutritionalFact?   
   ingredients      ProductIngredient[]
-  claims           ProductClaim[]
-  allergens        ProductAllergen[]
+  claims           ProductClaim[]     
+  allergens        ProductAllergen[] 
   summary          String
 
   // Fields for health-based recommendations
@@ -33,10 +33,10 @@ model Product {
   functionalBenefits String[]
   venderName         String
   vendorProductUrl   String
-  suitableFor        HealthDetail[]
+  suitableFor        HealthDetail[] 
   notSuitableFor     HealthDetail[]
-  personalOverviews  PersonalizedOverview[]
-  consumptions       Consumption[]
+  personalOverviews  PersonalizedOverview[] 
+  consumptions       Consumption[]      
 }
 
 model Category {
@@ -56,7 +56,7 @@ model ProductCategory {
 
 model NutritionalFact {
   id                Int     @id @default(autoincrement())
-  product           Product @relation(fields: [productId], references: [id])
+  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade) 
   productId         Int     @unique
   calories          Float?
   totalFat          Float?
@@ -86,9 +86,9 @@ model Ingredient {
 }
 
 model ProductIngredient {
-  product      Product    @relation(fields: [productId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id],onDelete: Cascade)
   productId    Int
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id],onDelete: Cascade)
   ingredientId Int
   orderNumber  Int
 
@@ -97,7 +97,7 @@ model ProductIngredient {
 
 model IngredientEffect {
   id                 Int        @id @default(autoincrement())
-  ingredient         Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredient         Ingredient @relation(fields: [ingredientId], references: [id],onDelete: Cascade)
   ingredientId       Int
   effectType         String?
   description        String?
@@ -108,7 +108,7 @@ model IngredientEffect {
 
 model ProductClaim {
   id                 Int     @id @default(autoincrement())
-  product            Product @relation(fields: [productId], references: [id])
+  product            Product @relation(fields: [productId], references: [id],onDelete: Cascade)
   productId          Int
   claim              String
   verificationStatus String?
@@ -123,9 +123,9 @@ model Allergen {
 }
 
 model ProductAllergen {
-  product    Product  @relation(fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id],onDelete: Cascade)
   productId  Int
-  allergen   Allergen @relation(fields: [allergenId], references: [id])
+  allergen   Allergen @relation(fields: [allergenId], references: [id],onDelete: Cascade)
   allergenId Int
 
   @@id([productId, allergenId])
@@ -198,8 +198,8 @@ model PersonalizedOverview {
   healthGoalImpacts        Json[]
   nutrientHighlights       Json[]
 
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id],onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id],onDelete: Cascade)
 
   @@unique([userId, productId])
   @@index([userId, productId])
@@ -212,8 +212,8 @@ model Consumption {
   quantity  Int // In unit of product
   duration  Int // In days
 
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id],onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id],onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -232,7 +232,7 @@ model WeeklyConsumptionAnalysis {
   aiAnalysis            Json
   createdAt             DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id],onDelete: Cascade)
 
   @@index([userId,createdAt])
 }

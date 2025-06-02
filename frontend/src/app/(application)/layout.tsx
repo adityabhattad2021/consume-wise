@@ -1,4 +1,3 @@
-
 import "@/app/globals.css";
 import { auth } from "@/auth";
 import Navbar from "@/components/navbar";

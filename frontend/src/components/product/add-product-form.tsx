@@ -34,7 +34,7 @@ export default function AddProductForm() {
         } catch (error: any) {
             toast({
                 title: "Error",
-                description: error.response.data.message,
+                description: 'Something went wrong, please try again later.',
                 variant: "destructive"
             })
         }

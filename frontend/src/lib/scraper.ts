@@ -106,7 +106,7 @@ function extractHighQualityImages(doc: Document): string[] {
 
 async function analyzeProductWithGemini(imageUrls: string[]): Promise<ProductDetails> {
 	try {
-		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+		const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp", generationConfig: { responseMimeType: "application/json" } });
 
 		const imageParts = await Promise.all(imageUrls.map(async (url) => {
 			const response = await fetch(url);

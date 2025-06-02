@@ -105,7 +105,7 @@ function generateCombinedPrompt(user: Partial<User>, product: Partial<ProductWit
     User: ${JSON.stringify(user)}
     Product: ${JSON.stringify(product)}
 
-    Be as detailed and specific as possible in your responses, especially regarding suitability reasons, safe consumption guidelines, and health goal impacts. Consider the user's health details, dietary preferences, health goals, and nutrition knowledge when generating the personalized information.  If the user has limited nutritional knowledge, explain concepts in simple terms. If the product is unsuitable due to allergies or health conditions, clearly state the reasons and provide specific alternatives or recommendations if possibl0e.
+    Be as detailed and specific as possible in your responses, especially regarding suitability reasons, safe consumption guidelines, and health goal impacts. Consider the user's health details, dietary preferences, health goals, and nutrition knowledge when generating the personalized information.  If the user has limited nutritional knowledge, explain concepts in simple terms. If the product is unsuitable due to allergies or health conditions, clearly state the reasons and provide specific alternatives or recommendations if possible.
     Use personalized tone in the response, user should feel like the response is written for them specifically.
 
     Aim to provide a comprehensive, personalized, and actionable analysis that helps the user make an informed decision about the product while considering their unique health profile and goals.
@@ -143,7 +143,7 @@ export async function getCompleteProductInsights(userId: string, productId: numb
     const { user, product } = await fetchAllData(userId, productId);
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
     const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-pro-002",
+        model: "gemini-2.0-flash-exp",
         generationConfig: { responseMimeType: "application/json" }
     });
 

@@ -57,6 +57,7 @@ export default function Navbar({ userLoggedIn }: NavbarProps) {
                 className={cn("fixed top-6 inset-x-0 mx-auto w-[88%] z-50")}
             >
 
+                <div className="relative rounded-2xl border bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-lg flex items-center justify-between px-3 py-2 sm:px-4 sm:py-4 md:px-8 md:py-6">
                     <Link href="/" className="flex items-center gap-1 sm:gap-2">
                         <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                         <h1 className="text-lg sm:text-xl md:text-2xl font-bold">ConsumeWise</h1>
